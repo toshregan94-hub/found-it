@@ -8,7 +8,6 @@ export async function searchPlaces(text) {
   const url =
     "https://api.geoapify.com/v1/geocode/autocomplete" +
     `?text=${encodeURIComponent(text)}` +
-    "&filter=countrycode:ke" +
     "&bias=proximity:36.8219,-1.2921" +
     "&limit=5" +
     `&apiKey=${KEY}`;

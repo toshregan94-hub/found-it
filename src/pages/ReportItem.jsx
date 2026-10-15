@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { searchPlaces } from "../utils/geoapify";
-import { categories } from "../data/mockData";
-import { addItem } from "../utils/api";
+import { Link } from "react-router-dom";
+import { getCategories, addItem } from "../utils/api";
 import { fileToDataUrl } from "../utils/image";
 import "./ReportItem.css";
 
@@ -22,6 +22,15 @@ function ReportItem() {
   const [submitError, setSubmitError] = useState("");
   const [photoError, setPhotoError] = useState("");
   const [isDraggingPhoto, setIsDraggingPhoto] = useState(false);
+  const [categories, setCategories] = useState([]); // [{ id, name }] from the backend
+  const [categoriesError, setCategoriesError] = useState("");
+  const [needsLogin, setNeedsLogin] = useState(false);
+
+  useEffect(() => {
+    getCategories()
+      .then(setCategories)
+      .catch((err) => setCategoriesError(err.message));
+  }, []);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -99,11 +108,18 @@ function ReportItem() {
 
     setSaving(true);
     setSubmitError("");
+    setNeedsLogin(false);
     try {
-      await addItem({ ...form, location, photo, status: "active" });
+      // form.category holds the category id chosen in the dropdown
+      await addItem({ ...form, categoryId: form.category, location, photo, status: "active" });
       setSubmitted(true);
     } catch (err) {
-      setSubmitError(err.message);
+      if (err.status === 401) {
+        setNeedsLogin(true);
+        setSubmitError("Please log in to submit a report.");
+      } else {
+        setSubmitError(err.message);
+      }
     } finally {
       setSaving(false);
     }
@@ -144,8 +160,9 @@ function ReportItem() {
           <label htmlFor="category">Category</label>
           <select className="input" id="category" name="category" value={form.category} onChange={handleChange}>
             <option value="">Select...</option>
-            {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+            {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
           </select>
+          {categoriesError && <p className="field-error">{categoriesError}</p>}
           {errors.category && <p className="field-error">{errors.category}</p>}
         </div>
 
@@ -215,7 +232,11 @@ function ReportItem() {
           )}
         </div>
 
-        {submitError && <p className="field-error submit-error" role="alert">{submitError}</p>}
+        {submitError && (
+          <p className="field-error submit-error" role="alert">
+            {submitError} {needsLogin && <Link to="/login">Log in</Link>}
+          </p>
+        )}
         <button className="submit-btn" type="submit" disabled={saving}>
           {saving ? "Saving..." : "Submit report"}
         </button>

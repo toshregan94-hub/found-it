@@ -116,28 +116,66 @@ export async function updateItem(id, changes) {
 
 // Owner only.
 export function deleteItem(id) {
-  return request(`/items/${id}`, { method: "DELETE" }, "Could not delete the report. Try again.");
+  return request(
+    `/items/${id}`,
+    { method: "DELETE" },
+    "Could not delete the report. Try again."
+  );
 }
 
-  // ---------- Accounts (Wesley's auth endpoints) ----------
+// ---------- Dashboard ----------
+
+export function getMyItems(userId) {
+  return request(
+    `/users/${userId}/items`,
+    {},
+    "Could not load your reported items."
+  );
+}
+
+export function getMyClaims(userId) {
+  return request(
+    `/users/${userId}/claims`,
+    {},
+    "Could not load your claims."
+  );
+}
+
+// ---------- Accounts (Wesley's auth endpoints) ----------
 
 export function register(username, email, password) {
-  return request("/register", { method: "POST", body: { username, email, password } }, "Could not create your account.");
+  return request(
+    "/register",
+    { method: "POST", body: { username, email, password } },
+    "Could not create your account."
+  );
 }
 
 // identifier can be a username or an email
 export function login(identifier, password) {
-  return request("/login", { method: "POST", body: { identifier, password } }, "Could not log you in.");
+  return request(
+    "/login",
+    { method: "POST", body: { identifier, password } },
+    "Could not log you in."
+  );
 }
 
 export function logout() {
-  return request("/logout", { method: "POST" }, "Could not log out.");
+  return request(
+    "/logout",
+    { method: "POST" },
+    "Could not log out."
+  );
 }
 
 // Returns { logged_in, user }. Never throws, so pages can call it on load.
 export async function checkSession() {
   try {
-    return await request("/check_session", {}, "Could not check your session.");
+    return await request(
+      "/check_session",
+      {},
+      "Could not check your session."
+    );
   } catch {
     return { logged_in: false, user: null };
   }

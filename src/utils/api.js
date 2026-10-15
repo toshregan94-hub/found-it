@@ -118,3 +118,27 @@ export async function updateItem(id, changes) {
 export function deleteItem(id) {
   return request(`/items/${id}`, { method: "DELETE" }, "Could not delete the report. Try again.");
 }
+
+  // ---------- Accounts (Wesley's auth endpoints) ----------
+
+export function register(username, email, password) {
+  return request("/register", { method: "POST", body: { username, email, password } }, "Could not create your account.");
+}
+
+// identifier can be a username or an email
+export function login(identifier, password) {
+  return request("/login", { method: "POST", body: { identifier, password } }, "Could not log you in.");
+}
+
+export function logout() {
+  return request("/logout", { method: "POST" }, "Could not log out.");
+}
+
+// Returns { logged_in, user }. Never throws, so pages can call it on load.
+export async function checkSession() {
+  try {
+    return await request("/check_session", {}, "Could not check your session.");
+  } catch {
+    return { logged_in: false, user: null };
+  }
+}

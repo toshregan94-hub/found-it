@@ -1,15 +1,76 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { login, logout, register, checkSession } from "../utils/api";
 
 function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
+  const [form, setForm] = useState({ username: "", email: "", password: "", confirmPassword: "" });
+  const [user, setUser] = useState(null);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Is someone already logged in?
+  useEffect(() => {
+    checkSession()
+      .then((data) => setUser(data.user))
+      .catch(() => setUser(null));
+  }, []);
+
+  function handleChange(e) {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setMessage("");
+
+    if (isRegistering && form.password !== form.confirmPassword) {
+      setMessage("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (isRegistering) {
+        await register(form.username, form.email, form.password);
+      }
+      // After registering, log straight in. On the login form, "email" can be an email or a username.
+      const data = await login(form.email, form.password);
+      setUser(data.user);
+      setForm({ username: "", email: "", password: "", confirmPassword: "" });
+    } catch (err) {
+      setMessage(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleLogout() {
+    await logout();
+    setUser(null);
+    setMessage("You have logged out.");
+  }
+
+  if (user) {
+    return (
+      <section className="auth-page">
+        <div className="auth-card">
+          <div className="auth-header">
+            <h1>Welcome, {user.username}</h1>
+            <p>You are logged in as {user.email}.</p>
+          </div>
+          <button type="button" className="btn auth-button" onClick={handleLogout}>
+            Log out
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="auth-page">
       <div className="auth-card">
         <div className="auth-header">
           <h1>{isRegistering ? "Create an account" : "Welcome back"}</h1>
-
           <p>
             {isRegistering
               ? "Create an account to start using FoundIt."
@@ -17,81 +78,49 @@ function Login() {
           </p>
         </div>
 
-        <form className="auth-form">
+        <form className="auth-form" onSubmit={handleSubmit}>
           {isRegistering && (
             <div className="form-group">
-              <label htmlFor="name">Full name</label>
-              <input
-                id="name"
-                type="text"
-                className="input"
-                placeholder="Enter your full name"
-              />
+              <label htmlFor="username">Username</label>
+              <input id="username" name="username" type="text" className="input"
+                placeholder="Choose a username" value={form.username} onChange={handleChange} required />
             </div>
           )}
 
           <div className="form-group">
-            <label htmlFor="email">Email address</label>
-            <input
-              id="email"
-              type="email"
-              className="input"
-              placeholder="Enter your email"
-            />
+            <label htmlFor="email">{isRegistering ? "Email address" : "Email or username"}</label>
+            <input id="email" name="email" type={isRegistering ? "email" : "text"} className="input"
+              placeholder={isRegistering ? "Enter your email" : "Enter your email or username"}
+              value={form.email} onChange={handleChange} required />
           </div>
 
           <div className="form-group">
             <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              className="input"
-              placeholder="Enter your password"
-            />
+            <input id="password" name="password" type="password" className="input"
+              placeholder={isRegistering ? "At least 8 characters" : "Enter your password"}
+              value={form.password} onChange={handleChange} required />
           </div>
 
           {isRegistering && (
             <div className="form-group">
               <label htmlFor="confirmPassword">Confirm password</label>
-              <input
-                id="confirmPassword"
-                type="password"
-                className="input"
-                placeholder="Confirm your password"
-              />
+              <input id="confirmPassword" name="confirmPassword" type="password" className="input"
+                placeholder="Confirm your password" value={form.confirmPassword} onChange={handleChange} required />
             </div>
           )}
 
-          <button
-  type="button"
-  className="btn auth-button"
-  onClick={() =>
-    setMessage(
-      isRegistering
-        ? "Registration is not available yet. Authentication will be added in a later phase."
-        : "Login is not available yet. Authentication will be added in a later phase."
-    )
-  }
->
-  {isRegistering ? "Create account" : "Log in"}
-</button>
+          <button type="submit" className="btn auth-button" disabled={loading}>
+            {loading ? "Please wait..." : isRegistering ? "Create account" : "Log in"}
+          </button>
 
-{message && <p className="auth-message">{message}</p>}
+          {message && <p className="auth-message">{message}</p>}
         </form>
 
         <div className="auth-switch">
-          <p>
-            {isRegistering
-              ? "Already have an account?"
-              : "Don't have an account?"}
-          </p>
-
-          <button
-            type="button"
-            className="switch-button"
-            onClick={() => setIsRegistering(!isRegistering)}
-          >
-            {isRegistering ? "Log in" : "Register"}
+          <p>{isRegistering ? "Already have an account?" : "New to FoundIt?"}</p>
+          <button type="button" className="switch-button"
+            onClick={() => { setIsRegistering(!isRegistering); setMessage(""); }}>
+            {isRegistering ? "Log in" : "Create an account"}
           </button>
         </div>
       </div>

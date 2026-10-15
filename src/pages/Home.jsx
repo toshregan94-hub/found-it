@@ -1,29 +1,44 @@
 import Hero from "../components/Hero";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getItems } from "../utils/api";
+import { getItems, getCategories } from "../utils/api";
 import "./Home.css";
 
 function Home() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [categories, setCategories] = useState([]);
   const [items, setItems] = useState(null); // null = still loading
   const [error, setError] = useState("");
 
   useEffect(() => {
-    let ignore = false;
-    getItems()
-      .then((data) => { if (!ignore) setItems(data); })
-      .catch((err) => { if (!ignore) setError(err.message); });
-    return () => { ignore = true; };
+    getCategories()
+      .then(setCategories)
+      .catch(() => {}); // the category filter just stays empty; the item error below covers a down server
   }, []);
 
-  // newest reports first
-  const shownItems = [...(items || [])].sort((a, b) => b.id - a.id).filter((item) => {
-    const matchesType = filter === "all" || item.reportType === filter;
-    const matchesSearch = item.itemName.toLowerCase().includes(search.toLowerCase());
-    return matchesType && matchesSearch;
-  });
+  // The backend does the searching and filtering; the newest reports come first.
+  // The short delay stops a request being sent on every keystroke.
+  useEffect(() => {
+    let ignore = false;
+    const timer = setTimeout(() => {
+      getItems({ search, type: filter, categoryId })
+        .then((data) => {
+          if (!ignore) {
+            setItems(data);
+            setError("");
+          }
+        })
+        .catch((err) => { if (!ignore) setError(err.message); });
+    }, 300);
+    return () => {
+      ignore = true;
+      clearTimeout(timer);
+    };
+  }, [search, filter, categoryId]);
+
+  const shownItems = items || [];
 
   return (
     <div className="container">
@@ -37,6 +52,17 @@ function Home() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <select
+          className="input"
+          aria-label="Filter by category"
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
+        >
+          <option value="">All categories</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>{category.name}</option>
+          ))}
+        </select>
         <div className="filter-buttons">
           {["all", "lost", "found"].map((type) => (
             <button

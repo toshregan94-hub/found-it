@@ -29,3 +29,38 @@ export async function addItem(item) {
   if (!res.ok) throw new Error("Could not save your report. Try again.");
   return res.json();
 }
+
+const BACKEND_API_URL =
+  import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5555";
+
+async function backendRequest(path, options = {}) {
+  let res;
+
+  try {
+    res = await fetch(`${BACKEND_API_URL}${path}`, {
+      ...options,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+  } catch {
+    throw new Error("Can't reach the FoundIt backend.");
+  }
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error || "Something went wrong.");
+  }
+
+  return res.json();
+}
+
+export function getMyItems(userId) {
+  return backendRequest(`/api/users/${userId}/items`);
+}
+
+export function getMyClaims(userId) {
+  return backendRequest(`/api/users/${userId}/claims`);
+}

@@ -1,54 +1,41 @@
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getMyItems, getMyClaims } from "../utils/api";
+const USER_ID = Number(import.meta.env.VITE_USER_ID || 1);
 function Dashboard() {
-  const [reports, setReports] = useState([
-    {
-      id: 1,
-      type: "Lost",
-      title: "Black Backpack",
-      location: "Sarit Centre, Westlands",
-      date: "28 September 2026",
-      status: "Active",
-    },
-    {
-      id: 2,
-      type: "Found",
-      title: "Phone in Blue Case",
-      location: "Archives Stage, Nairobi CBD",
-      date: "26 September 2026",
-      status: "Returned",
-    },
-    {
-      id: 3,
-      type: "Lost",
-      title: "Student ID Card",
-      location: "University campus",
-      date: "24 September 2026",
-      status: "Active",
-    },
-  ]);
-
+  const [reports, setReports] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({
     title: "",
     location: "",
   });
 
-  const claims = [
-    {
-      id: 1,
-      item: "Phone in Blue Case",
-      status: "Pending",
-      date: "29 September 2026",
-    },
-    {
-      id: 2,
-      item: "Black Backpack",
-      status: "Approved",
-      date: "28 September 2026",
-    },
-  ];
+  const [claims, setClaims] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  useEffect(() => {
+    async function loadDashboard() {
+      try {
+        setLoading(true);
+        setError("");
 
+        const [itemsData, claimsData] = await Promise.all([
+          getMyItems(USER_ID),
+          getMyClaims(USER_ID),
+        ]);
+
+        setReports(itemsData.items || []);
+        setClaims(claimsData.claims || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboard();
+  }, []);
   const startEditing = (report) => {
     setEditingId(report.id);
     setEditForm({
@@ -77,17 +64,24 @@ function Dashboard() {
     setReports(
       reports.map((report) =>
         report.id === id
-          ? { ...report, status: "Returned" }
+          ? { ...report, status: "resolved" }
           : report
       )
     );
   };
 
-  const lostItems = reports.filter((report) => report.type === "Lost").length;
-  const foundItems = reports.filter((report) => report.type === "Found").length;
+  const lostItems = reports.filter((report) => report.type === "lost").length;
+  const foundItems = reports.filter((report) => report.type === "found").length;
   const returnedItems = reports.filter(
-    (report) => report.status === "Returned"
+    (report) => report.status === "resolved"
   ).length;
+  if (loading) {
+      return <p>Loading dashboard...</p>;
+  }
+
+  if (error) {
+      return <p>{error}</p>;
+  }
 
   return (
     <section className="dashboard-page">
@@ -100,7 +94,7 @@ function Dashboard() {
           </p>
         </div>
 
-        <button type="button" className="btn">
+        <button type="button" className="btn" onClick={() => navigate("/report")}>
           Report an item
         </button>
       </div>
@@ -135,7 +129,8 @@ function Dashboard() {
         </div>
 
         <div className="dashboard-items">
-          {reports.map((report) => (
+          {reports.length === 0 ? (<p>No reported items yet.</p>) : (
+            reports.map((report) => (
             <article className="dashboard-item" key={report.id}>
               {editingId === report.id ? (
                 <div className="edit-report-form">
@@ -198,12 +193,12 @@ function Dashboard() {
                   <div className="item-info">
                     <span
                       className={`badge ${
-                        report.type === "Lost"
+                        report.type === "lost"
                           ? "badge-lost"
                           : "badge-found"
                       }`}
                     >
-                      {report.type}
+                      {report.type === "lost" ? "Lost" : "Found"}
                     </span>
 
                     <h3>{report.title}</h3>
@@ -214,7 +209,7 @@ function Dashboard() {
                       {report.date}
                     </span>
 
-                    {report.status === "Returned" && (
+                    {report.status === "resolved" && (
                       <span className="closed-text">
                         This report has been closed.
                       </span>
@@ -224,15 +219,15 @@ function Dashboard() {
                   <div className="report-right">
                     <span
                       className={`status-badge ${
-                        report.status === "Returned"
+                        report.status === "resolved"
                           ? "status-returned"
                           : "status-active"
                       }`}
                     >
-                      {report.status}
+                      {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
                     </span>
 
-                    {report.status !== "Returned" && (
+                    {report.status !== "resolved" && (
                       <div className="report-actions">
                         <button
                           type="button"
@@ -255,7 +250,8 @@ function Dashboard() {
                 </>
               )}
             </article>
-          ))}
+          ))
+        )}
         </div>
       </div>
 
@@ -269,25 +265,29 @@ function Dashboard() {
         </div>
 
         <div className="dashboard-items">
-          {claims.map((claim) => (
+          {claims.length === 0 ? (
+            <p>No claims submitted yet</p>):(claims.map((claim) => (
             <article className="dashboard-item" key={claim.id}>
               <div className="item-info">
-                <h3>{claim.item}</h3>
+                <h3>Item #{claim.item_id}</h3>
 
-                <p>Claim submitted on {claim.date}</p>
+                <p>Claim submitted on {" "} {claim.created_at
+                  ? new Date(claim.created_at).toLocaleDateString(): "Unknown date"}
+                </p>
               </div>
 
               <span
                 className={`status-badge ${
-                  claim.status === "Approved"
+                  claim.status === "approved"
                     ? "status-returned"
                     : "status-active"
                 }`}
               >
-                {claim.status}
+                {claim.status.charAt(0).toUpperCase() + claim.status.slice(1)}
               </span>
             </article>
-          ))}
+          ))
+        )}
         </div>
       </div>
 

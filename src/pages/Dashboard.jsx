@@ -1,87 +1,138 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getMyItems, getMyClaims } from "../utils/api";
-const USER_ID = Number(import.meta.env.VITE_USER_ID || 1);
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import CategoryManager from "../components/CategoryManager";
+import { checkSession, getMyItems, updateItem, deleteItem } from "../utils/api";
+
+// backend status -> the label shown on the page
+const STATUS_LABELS = { active: "Active", claimed: "Claimed", resolved: "Returned" };
+
+function formatDate(iso) {
+  if (!iso) return "";
+  const date = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
 function Dashboard() {
-  const [reports, setReports] = useState([]);
+  const [user, setUser] = useState(undefined); // undefined = still checking, null = not logged in
+  const [reports, setReports] = useState(null); // null = still loading
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({
-    title: "",
-    location: "",
-  });
+  const [editForm, setEditForm] = useState({ title: "", location: "" });
 
-  const [claims, setClaims] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
   useEffect(() => {
-    async function loadDashboard() {
-      try {
-        setLoading(true);
-        setError("");
-
-        const [itemsData, claimsData] = await Promise.all([
-          getMyItems(USER_ID),
-          getMyClaims(USER_ID),
-        ]);
-
-        setReports(itemsData.items || []);
-        setClaims(claimsData.claims || []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+    let ignore = false;
+    async function load() {
+      const session = await checkSession();
+      if (ignore) return;
+      if (!session.logged_in) {
+        setUser(null);
+        return;
       }
+      setUser(session.user);
+      const items = await getMyItems(session.user.id);
+      if (!ignore) setReports(items);
     }
-
-    loadDashboard();
+    load().catch((err) => { if (!ignore) setLoadError(err.message); });
+    return () => { ignore = true; };
   }, []);
+
+  const claims = [
+    {
+      id: 1,
+      item: "Phone in Blue Case",
+      status: "Pending",
+      date: "29 September 2026",
+    },
+    {
+      id: 2,
+      item: "Black Backpack",
+      status: "Approved",
+      date: "28 September 2026",
+    },
+  ];
+
+  // Runs one request, shows the server's message if it fails.
+  async function run(action) {
+    setSaving(true);
+    setActionError("");
+    try {
+      await action();
+    } catch (err) {
+      setActionError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const startEditing = (report) => {
     setEditingId(report.id);
-    setEditForm({
-      title: report.title,
-      location: report.location,
+    setEditForm({ title: report.itemName, location: report.location.name });
+    setActionError("");
+  };
+
+  const saveEdit = (report) => {
+    const title = editForm.title.trim();
+    const place = editForm.location.trim();
+    if (!title) {
+      setActionError("The item name cannot be empty.");
+      return;
+    }
+    const changes = { itemName: title };
+    // a new place name means the saved map coordinates no longer match, so clear them
+    if (place !== report.location.name) changes.location = { name: place, lat: null, lon: null };
+
+    run(async () => {
+      const updated = await updateItem(report.id, changes);
+      setReports((list) => list.map((r) => (r.id === report.id ? updated : r)));
+      setEditingId(null);
     });
   };
 
-  const saveEdit = (id) => {
-    setReports(
-      reports.map((report) =>
-        report.id === id
-          ? {
-              ...report,
-              title: editForm.title,
-              location: editForm.location,
-            }
-          : report
-      )
-    );
+  const closeReport = (report) =>
+    run(async () => {
+      const updated = await updateItem(report.id, { status: "resolved" });
+      setReports((list) => list.map((r) => (r.id === report.id ? updated : r)));
+    });
 
-    setEditingId(null);
+  const deleteReport = (report) => {
+    if (!window.confirm(`Delete "${report.itemName}"? Any claims on it will be deleted too.`)) return;
+    run(async () => {
+      await deleteItem(report.id);
+      setReports((list) => list.filter((r) => r.id !== report.id));
+    });
   };
 
-  const closeReport = (id) => {
-    setReports(
-      reports.map((report) =>
-        report.id === id
-          ? { ...report, status: "resolved" }
-          : report
-      )
+  if (user === null) {
+    return (
+      <section className="dashboard-page">
+        <h1>Your dashboard</h1>
+        <p>Please log in to see and manage your reports. <Link to="/login">Log in</Link></p>
+      </section>
     );
-  };
-
-  const lostItems = reports.filter((report) => report.type === "lost").length;
-  const foundItems = reports.filter((report) => report.type === "found").length;
-  const returnedItems = reports.filter(
-    (report) => report.status === "resolved"
-  ).length;
-  if (loading) {
-      return <p>Loading dashboard...</p>;
   }
 
-  if (error) {
-      return <p>{error}</p>;
+  if (loadError) {
+    return (
+      <section className="dashboard-page">
+        <p className="empty">{loadError}</p>
+      </section>
+    );
   }
+
+  if (user === undefined || reports === null) {
+    return (
+      <section className="dashboard-page">
+        <p className="empty">Loading your dashboard...</p>
+      </section>
+    );
+  }
+
+  const lostItems = reports.filter((report) => report.reportType === "lost").length;
+  const foundItems = reports.filter((report) => report.reportType === "found").length;
+  const returnedItems = reports.filter((report) => report.status === "resolved").length;
 
   return (
     <section className="dashboard-page">
@@ -94,7 +145,7 @@ function Dashboard() {
           </p>
         </div>
 
-        <button type="button" className="btn" onClick={() => navigate("/report")}>
+        <button type="button" className="btn">
           Report an item
         </button>
       </div>
@@ -123,14 +174,19 @@ function Dashboard() {
           <div>
             <h2>My reported items</h2>
             <p>
-              View, edit and close the items you have reported.
+              View, edit, close or delete the items you have reported.
             </p>
           </div>
         </div>
 
+        {actionError && <p className="field-error" role="alert">{actionError}</p>}
+
         <div className="dashboard-items">
-          {reports.length === 0 ? (<p>No reported items yet.</p>) : (
-            reports.map((report) => (
+          {reports.length === 0 && (
+            <p>You have not reported anything yet. <Link to="/report">Report an item</Link></p>
+          )}
+
+          {reports.map((report) => (
             <article className="dashboard-item" key={report.id}>
               {editingId === report.id ? (
                 <div className="edit-report-form">
@@ -174,7 +230,8 @@ function Dashboard() {
                     <button
                       type="button"
                       className="btn"
-                      onClick={() => saveEdit(report.id)}
+                      disabled={saving}
+                      onClick={() => saveEdit(report)}
                     >
                       Save changes
                     </button>
@@ -193,20 +250,20 @@ function Dashboard() {
                   <div className="item-info">
                     <span
                       className={`badge ${
-                        report.type === "lost"
+                        report.reportType === "lost"
                           ? "badge-lost"
                           : "badge-found"
                       }`}
                     >
-                      {report.type === "lost" ? "Lost" : "Found"}
+                      {report.reportType === "lost" ? "Lost" : "Found"}
                     </span>
 
-                    <h3>{report.title}</h3>
+                    <h3>{report.itemName}</h3>
 
-                    <p>Reported from {report.location}</p>
+                    <p>Reported from {report.location.name}</p>
 
                     <span className="item-date">
-                      {report.date}
+                      {formatDate(report.date)}
                     </span>
 
                     {report.status === "resolved" && (
@@ -224,36 +281,49 @@ function Dashboard() {
                           : "status-active"
                       }`}
                     >
-                      {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                      {STATUS_LABELS[report.status] || report.status}
                     </span>
 
-                    {report.status !== "resolved" && (
-                      <div className="report-actions">
-                        <button
-                          type="button"
-                          className="secondary-button"
-                          onClick={() => startEditing(report)}
-                        >
-                          Edit
-                        </button>
+                    <div className="report-actions">
+                      {report.status !== "resolved" && (
+                        <>
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={() => startEditing(report)}
+                          >
+                            Edit
+                          </button>
 
-                        <button
-                          type="button"
-                          className="close-button"
-                          onClick={() => closeReport(report.id)}
-                        >
-                          Close report
-                        </button>
-                      </div>
-                    )}
+                          <button
+                            type="button"
+                            className="close-button"
+                            disabled={saving}
+                            onClick={() => closeReport(report)}
+                          >
+                            Close report
+                          </button>
+                        </>
+                      )}
+
+                      <button
+                        type="button"
+                        className="close-button"
+                        disabled={saving}
+                        onClick={() => deleteReport(report)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
             </article>
-          ))
-        )}
+          ))}
         </div>
       </div>
+
+      <CategoryManager />
 
       {/* My claims */}
       <div className="dashboard-section">
@@ -265,29 +335,25 @@ function Dashboard() {
         </div>
 
         <div className="dashboard-items">
-          {claims.length === 0 ? (
-            <p>No claims submitted yet</p>):(claims.map((claim) => (
+          {claims.map((claim) => (
             <article className="dashboard-item" key={claim.id}>
               <div className="item-info">
-                <h3>Item #{claim.item_id}</h3>
+                <h3>{claim.item}</h3>
 
-                <p>Claim submitted on {" "} {claim.created_at
-                  ? new Date(claim.created_at).toLocaleDateString(): "Unknown date"}
-                </p>
+                <p>Claim submitted on {claim.date}</p>
               </div>
 
               <span
                 className={`status-badge ${
-                  claim.status === "approved"
+                  claim.status === "Approved"
                     ? "status-returned"
                     : "status-active"
                 }`}
               >
-                {claim.status.charAt(0).toUpperCase() + claim.status.slice(1)}
+                {claim.status}
               </span>
             </article>
-          ))
-        )}
+          ))}
         </div>
       </div>
 
@@ -315,5 +381,4 @@ function Dashboard() {
     </section>
   );
 }
-
 export default Dashboard;

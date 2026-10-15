@@ -82,6 +82,20 @@ export function getCategories() {
   return request("/categories", {}, "Could not load categories.");
 }
 
+// Category management. All three need a logged-in user.
+export function createCategory(name) {
+  return request("/categories", { method: "POST", body: { name } }, "Could not add the category.");
+}
+
+export function updateCategory(id, name) {
+  return request(`/categories/${id}`, { method: "PATCH", body: { name } }, "Could not rename the category.");
+}
+
+// The server refuses (409) while any item still uses the category.
+export function deleteCategory(id) {
+  return request(`/categories/${id}`, { method: "DELETE" }, "Could not delete the category.");
+}
+
 // Newest first. Filters are optional: { search, type: "lost" | "found" | "all", categoryId }
 export async function getItems({ search, type, categoryId } = {}) {
   const params = new URLSearchParams();
@@ -123,15 +137,14 @@ export function deleteItem(id) {
   );
 }
 
+// Every report made by one user (newest first), for the Dashboard.
+export async function getMyItems(userId) {
+  const data = await request(`/users/${userId}/items`, {}, "Could not load your reports.");
+  return data.items.map(toFrontendItem);
+ }
+
 // ---------- Dashboard ----------
 
-export function getMyItems(userId) {
-  return request(
-    `/users/${userId}/items`,
-    {},
-    "Could not load your reported items."
-  );
-}
 
 export function getMyClaims(userId) {
   return request(

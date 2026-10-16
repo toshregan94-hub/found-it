@@ -8,15 +8,23 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API}/api/me`, { credentials: "include" })
+    fetch(`${API}/api/check_session`, { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))
-      .then(setUser)
+      .then((data) => setUser(data?.user ?? null))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
 
+  async function logout() {
+    await fetch(`${API}/api/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+    setUser(null);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, setUser, loading }}>
+    <AuthContext.Provider value={{ user, setUser, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

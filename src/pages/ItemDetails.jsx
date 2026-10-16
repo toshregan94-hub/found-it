@@ -1,14 +1,67 @@
 import { useEffect, useState } from "react";
+<<<<<<< HEAD
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ClaimForm from "../components/ClaimForm";
+=======
+import ClaimForm from "../components/ClaimForm";
+import PossibleMatches from "../components/PossibleMatches";
+import { useParams, Link } from "react-router-dom";
+import { getItem } from "../utils/api";
+>>>>>>> upstream/main
 import "./ItemDetails.css";
 
 const API = "http://localhost:5555";
 
 function ItemDetails() {
   const { id } = useParams();
+<<<<<<< HEAD
   const { user, loading: authLoading } = useAuth();
+=======
+  const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadedId, setLoadedId] = useState(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let ignore = false;
+
+    getItem(id)
+      .then((loadedItem) => {
+        if (!ignore) {
+          setItem(loadedItem);
+          setError("");
+          setLoadedId(id);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          setError(err.message);
+          setLoadedId(id);
+        }
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [id]);
+  if (loading || loadedId !== id) {
+    return <p className="item-details-notfound">Loading item...</p>;
+  }
+
+  if (error) {
+    return (
+      <section className="item-details-notfound">
+        <h1>Could not load item</h1>
+        <p>{error}</p>
+        <Link to="/">Back to all items</Link>
+      </section>
+    );
+  }
+>>>>>>> upstream/main
 
   const [item, setItem] = useState(null);
   const [notFound, setNotFound] = useState(false);
@@ -87,10 +140,13 @@ function ItemDetails() {
     );
   }
 
+<<<<<<< HEAD
   const myClaim = claims.find((c) => c.user_id === user?.id);
   const canClaim = user && !isOwner && item.status === "active" && !myClaim;
   const reporterLabel =
     user && item.user_id === user.id ? "You" : `User #${item.user_id}`;
+=======
+>>>>>>> upstream/main
 
   return (
     <section className="item-details">
@@ -126,11 +182,16 @@ function ItemDetails() {
             <dt>Date</dt>
             <dd>{item.date || "Not specified"}</dd>
             <dt>Reported by</dt>
+<<<<<<< HEAD
             <dd>{reporterLabel}</dd>
+=======
+            <dd>{item.reporterUsername || `User #${item.reportedBy}`}</dd>
+>>>>>>> upstream/main
           </dl>
         </div>
       </div>
 
+<<<<<<< HEAD
       <div className="claims-section">
         {error && <p className="error">{error}</p>}
 
@@ -172,6 +233,15 @@ function ItemDetails() {
           </>
         )}
       </div>
+=======
+    {item.reportType === "lost" && item.status === "active" && (
+      <PossibleMatches itemId={item.id} />
+    )}
+
+    {item.reportType === "found" && item.status === "active" && (
+      <ClaimForm />
+    )}
+>>>>>>> upstream/main
     </section>
   );
 }

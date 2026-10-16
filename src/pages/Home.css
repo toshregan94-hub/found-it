@@ -1,0 +1,53 @@
+.home-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.home-controls .input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filter-buttons button {
+  text-transform: capitalize;
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.item-card {
+  text-decoration: none;
+  transition: transform 0.15s;
+}
+
+.item-card:hover {
+  transform: translateY(-3px);
+}
+
+.item-card h3 {
+  margin: 0.6rem 0 0.3rem;
+}
+
+.item-card p {
+  margin: 0 0 0.4rem;
+  color: var(--color-muted);
+}
+
+.item-card .badge {
+  text-transform: capitalize;
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-muted);
+}

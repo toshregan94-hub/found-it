@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMyItems, getMyClaims } from "../utils/api";
-const USER_ID = Number(import.meta.env.VITE_USER_ID || 1);
+import { getMyItems, getMyClaims, checkSession } from "../utils/api";
+
 function Dashboard() {
   const [reports, setReports] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -13,6 +13,7 @@ function Dashboard() {
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
     async function loadDashboard() {
@@ -20,9 +21,17 @@ function Dashboard() {
         setLoading(true);
         setError("");
 
+        const session = await checkSession();
+
+        if (!session.logged_in || !session.user) {
+          throw new Error("Please log in to view your dashboard.");
+        }
+        setUser(session.user);
+        const userId = session.user.id;
+
         const [itemsData, claimsData] = await Promise.all([
-          getMyItems(USER_ID),
-          getMyClaims(USER_ID),
+          getMyItems(userId),
+          getMyClaims(userId),
         ]);
 
         setReports(itemsData.items || []);
@@ -35,8 +44,8 @@ function Dashboard() {
     }
 
     loadDashboard();
-  }, []);
-  const startEditing = (report) => {
+  }, []); 
+ const startEditing = (report) => {
     setEditingId(report.id);
     setEditForm({
       title: report.title,
@@ -303,12 +312,12 @@ function Dashboard() {
         <div className="account-card">
           <div>
             <span className="account-label">Name</span>
-            <strong>FoundIt User</strong>
+            <strong>{user?.username || "Unknown user"}</strong>
           </div>
 
           <div>
             <span className="account-label">Email</span>
-            <strong>user@example.com</strong>
+            <strong>{user?.email || "No email available"}</strong>
           </div>
         </div>
       </div>

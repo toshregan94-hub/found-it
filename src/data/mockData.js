@@ -51,3 +51,4 @@ export const items = [
     date: "2026-09-26", location: { name: "Karura Forest, Nairobi", lat: -1.24, lon: 36.833 },
     photo: "", status: "active", reportedBy: 1 },
 ];
+

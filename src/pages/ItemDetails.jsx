@@ -1,30 +1,29 @@
 import { useEffect, useState } from "react";
-<<<<<<< HEAD
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ClaimForm from "../components/ClaimForm";
-=======
-import ClaimForm from "../components/ClaimForm";
 import PossibleMatches from "../components/PossibleMatches";
-import { useParams, Link } from "react-router-dom";
 import { getItem } from "../utils/api";
->>>>>>> upstream/main
 import "./ItemDetails.css";
 
 const API = "http://localhost:5555";
 
 function ItemDetails() {
   const { id } = useParams();
-<<<<<<< HEAD
   const { user, loading: authLoading } = useAuth();
-=======
+
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadedId, setLoadedId] = useState(null);
   const [error, setError] = useState("");
 
+  const [claims, setClaims] = useState([]);
+  const [isOwner, setIsOwner] = useState(false);
+  const [claimError, setClaimError] = useState("");
+
   useEffect(() => {
     let ignore = false;
+    setLoading(true);
 
     getItem(id)
       .then((loadedItem) => {
@@ -36,6 +35,7 @@ function ItemDetails() {
       })
       .catch((err) => {
         if (!ignore) {
+          setItem(null);
           setError(err.message);
           setLoadedId(id);
         }
@@ -47,41 +47,6 @@ function ItemDetails() {
     return () => {
       ignore = true;
     };
-  }, [id]);
-  if (loading || loadedId !== id) {
-    return <p className="item-details-notfound">Loading item...</p>;
-  }
-
-  if (error) {
-    return (
-      <section className="item-details-notfound">
-        <h1>Could not load item</h1>
-        <p>{error}</p>
-        <Link to="/">Back to all items</Link>
-      </section>
-    );
-  }
->>>>>>> upstream/main
-
-  const [item, setItem] = useState(null);
-  const [notFound, setNotFound] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const [claims, setClaims] = useState([]);
-  const [isOwner, setIsOwner] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    setLoading(true);
-    setNotFound(false);
-    fetch(`${API}/api/items/${id}`, { credentials: "include" })
-      .then((res) => {
-        if (!res.ok) throw new Error("Item not found");
-        return res.json();
-      })
-      .then(setItem)
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
   }, [id]);
 
   async function loadClaims() {
@@ -106,7 +71,7 @@ function ItemDetails() {
   }, [id, user, authLoading]);
 
   async function decide(claimId, status) {
-    setError("");
+    setClaimError("");
     const res = await fetch(`${API}/api/claims/${claimId}`, {
       method: "PATCH",
       credentials: "include",
@@ -115,42 +80,40 @@ function ItemDetails() {
     });
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error || "Could not update claim");
+      setClaimError(data.error || "Could not update claim");
       return;
     }
     setItem(data.item);
     loadClaims();
   }
 
-  if (loading || authLoading) {
-    return (
-      <section className="item-details">
-        <p>Loading...</p>
-      </section>
-    );
+  if (loading || authLoading || loadedId !== id) {
+    return <p className="item-details-notfound">Loading item...</p>;
   }
 
-  if (notFound || !item) {
+  if (error || !item) {
     return (
       <section className="item-details-notfound">
-        <h1>Item not found</h1>
-        <p>There is no item with ID {id}.</p>
+        <h1>Could not load item</h1>
+        <p>{error || `There is no item with ID ${id}.`}</p>
         <Link to="/">Back to all items</Link>
       </section>
     );
   }
 
-<<<<<<< HEAD
   const myClaim = claims.find((c) => c.user_id === user?.id);
-  const canClaim = user && !isOwner && item.status === "active" && !myClaim;
+  const canClaim =
+    user &&
+    !isOwner &&
+    item.status === "active" &&
+    item.reportType === "found" &&
+    !myClaim;
   const reporterLabel =
-    user && item.user_id === user.id ? "You" : `User #${item.user_id}`;
-=======
->>>>>>> upstream/main
+    item.reporterUsername || `User #${item.reportedBy ?? item.user_id}`;
 
   return (
     <section className="item-details">
-      <Link to="/" className="item-details-back">← Back to all items</Link>
+      <Link to="/" className="item-details-back">Back to all items</Link>
 
       <div className="item-details-layout">
         {item.image_url ? (
@@ -163,12 +126,8 @@ function ItemDetails() {
 
         <div className="item-details-info">
           <div className="item-details-badges">
-            <span className={`item-badge item-badge--${item.type}`}>
-              {item.type}
-            </span>
-            <span className={`item-badge item-badge--${item.status}`}>
-              {item.status}
-            </span>
+            <span className={`item-badge item-badge--${item.type}`}>{item.type}</span>
+            <span className={`item-badge item-badge--${item.status}`}>{item.status}</span>
           </div>
 
           <h1>{item.title}</h1>
@@ -182,20 +141,19 @@ function ItemDetails() {
             <dt>Date</dt>
             <dd>{item.date || "Not specified"}</dd>
             <dt>Reported by</dt>
-<<<<<<< HEAD
             <dd>{reporterLabel}</dd>
-=======
-            <dd>{item.reporterUsername || `User #${item.reportedBy}`}</dd>
->>>>>>> upstream/main
           </dl>
         </div>
       </div>
 
-<<<<<<< HEAD
-      <div className="claims-section">
-        {error && <p className="error">{error}</p>}
+      {item.reportType === "lost" && item.status === "active" && (
+        <PossibleMatches itemId={item.id} />
+      )}
 
-        {!user && (
+      <div className="claims-section">
+        {claimError && <p className="error">{claimError}</p>}
+
+        {!user && item.reportType === "found" && (
           <p>
             <Link to="/login">Log in</Link> to claim this item.
           </p>
@@ -233,15 +191,6 @@ function ItemDetails() {
           </>
         )}
       </div>
-=======
-    {item.reportType === "lost" && item.status === "active" && (
-      <PossibleMatches itemId={item.id} />
-    )}
-
-    {item.reportType === "found" && item.status === "active" && (
-      <ClaimForm />
-    )}
->>>>>>> upstream/main
     </section>
   );
 }

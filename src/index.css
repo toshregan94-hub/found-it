@@ -29,9 +29,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; }
 a { color: inherit; }
-<<<<<<< HEAD
 
-=======
 h1, h2, h3 { color: var(--color-primary); font-weight: 800; margin-top: 0; }
 img { max-width: 100%; display: block; }
 button, input, select, textarea { font: inherit; }
@@ -429,4 +427,3 @@ button, input, select, textarea { font: inherit; }
     width: 100%;
   }
 }
->>>>>>> upstream/main

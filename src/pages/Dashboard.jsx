@@ -1,58 +1,81 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import CategoryManager from "../components/CategoryManager";
-import { checkSession, getMyItems, updateItem, deleteItem } from "../utils/api";
+import {
+  checkSession,
+  getMyItems,
+  getMyClaims,
+  updateItem,
+  deleteItem,
+} from "../utils/api";
 
-// backend status -> the label shown on the page
-const STATUS_LABELS = { active: "Active", claimed: "Claimed", resolved: "Returned" };
+const STATUS_LABELS = {
+  active: "Active",
+  claimed: "Claimed",
+  resolved: "Returned",
+};
 
 function formatDate(iso) {
   if (!iso) return "";
+
   const date = new Date(`${iso}T00:00:00`);
+
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 function Dashboard() {
-  const [user, setUser] = useState(undefined); // undefined = still checking, null = not logged in
-  const [reports, setReports] = useState(null); // null = still loading
+  const [user, setUser] = useState(undefined);
+  const [reports, setReports] = useState(null);
+  const [claims, setClaims] = useState([]);
   const [loadError, setLoadError] = useState("");
   const [actionError, setActionError] = useState("");
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ title: "", location: "" });
+  const [editForm, setEditForm] = useState({
+    title: "",
+    location: "",
+  });
 
   useEffect(() => {
     let ignore = false;
+
     async function load() {
       const session = await checkSession();
+
       if (ignore) return;
-      if (!session.logged_in) {
+
+      if (!session.logged_in || !session.user) {
         setUser(null);
         return;
       }
-      setUser(session.user);
-      const items = await getMyItems(session.user.id);
-      if (!ignore) setReports(items);
-    }
-    load().catch((err) => { if (!ignore) setLoadError(err.message); });
-    return () => { ignore = true; };
-  }, []);
 
-  const claims = [
-    {
-      id: 1,
-      item: "Phone in Blue Case",
-      status: "Pending",
-      date: "29 September 2026",
-    },
-    {
-      id: 2,
-      item: "Black Backpack",
-      status: "Approved",
-      date: "28 September 2026",
-    },
-  ];
+      setUser(session.user);
+
+      const [items, claimsData] = await Promise.all([
+        getMyItems(session.user.id),
+        getMyClaims(session.user.id),
+      ]);
+
+      if (!ignore) {
+        setReports(items);
+        setClaims(claimsData.claims || []);
+      }
+    }
+
+    load().catch((err) => {
+      if (!ignore) setLoadError(err.message);
+    });
+
+    return () => {
+      ignore = true;
+    };
+  }, []); 
+
 
   // Runs one request, shows the server's message if it fails.
   async function run(action) {
@@ -323,8 +346,6 @@ function Dashboard() {
         </div>
       </div>
 
-      <CategoryManager />
-
       {/* My claims */}
       <div className="dashboard-section">
         <div className="section-heading">
@@ -335,22 +356,33 @@ function Dashboard() {
         </div>
 
         <div className="dashboard-items">
+          {claims.length === 0 && (
+          <p>You have not submitted any claims yet.</p>)}
           {claims.map((claim) => (
             <article className="dashboard-item" key={claim.id}>
               <div className="item-info">
-                <h3>{claim.item}</h3>
+                <h3>{`Item #${claim.item_id}`}</h3>
 
-                <p>Claim submitted on {claim.date}</p>
+                <p>
+                  Claim submitted on{" "}
+                  {claim.created_at
+                    ? new Date(claim.created_at).toLocaleDateString("en-GB")
+                    : "Unknown date"}
+                </p>
               </div>
-
+              <Link to={`/items/${claim.item_id}`} className="secondary-button">
+                View item
+              </Link>
               <span
                 className={`status-badge ${
-                  claim.status === "Approved"
+                  claim.status === "approved"
                     ? "status-returned"
                     : "status-active"
                 }`}
               >
-                {claim.status}
+                {claim.status
+                  ? claim.status.charAt(0).toUpperCase() + claim.status.slice(1)
+                  : "Unknown"}
               </span>
             </article>
           ))}
@@ -369,12 +401,12 @@ function Dashboard() {
         <div className="account-card">
           <div>
             <span className="account-label">Name</span>
-            <strong>FoundIt User</strong>
+            <strong>{user?.username || "Unknown user"}</strong>
           </div>
 
           <div>
             <span className="account-label">Email</span>
-            <strong>user@example.com</strong>
+            <strong>{user?.email || "No email available"}</strong>
           </div>
         </div>
       </div>

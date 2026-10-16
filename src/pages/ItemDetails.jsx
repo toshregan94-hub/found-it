@@ -2,25 +2,23 @@ import { useEffect, useState } from "react";
 import ClaimForm from "../components/ClaimForm";
 import PossibleMatches from "../components/PossibleMatches";
 import { useParams, Link } from "react-router-dom";
-import { users } from "../data/mockData";
-import { getItems } from "../utils/api";
+import { getItem } from "../utils/api";
 import "./ItemDetails.css";
 
 function ItemDetails() {
   const { id } = useParams();
   const [item, setItem] = useState(null);
-  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadedId, setLoadedId] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let ignore = false;
-    getItems()
-      .then((loadedItems) => {
+
+    getItem(id)
+      .then((loadedItem) => {
         if (!ignore) {
-          setItems(loadedItems);
-          setItem(loadedItems.find((entry) => String(entry.id) === id) || null);
+          setItem(loadedItem);
           setError("");
           setLoadedId(id);
         }
@@ -34,9 +32,11 @@ function ItemDetails() {
       .finally(() => {
         if (!ignore) setLoading(false);
       });
-    return () => { ignore = true; };
-  }, [id]);
 
+    return () => {
+      ignore = true;
+    };
+  }, [id]);
   if (loading || loadedId !== id) {
     return <p className="item-details-notfound">Loading item...</p>;
   }
@@ -61,7 +61,6 @@ function ItemDetails() {
     );
   }
 
-  const reporter = users.find((u) => u.id === item.reportedBy);
 
   return (
     <section className="item-details">
@@ -97,13 +96,13 @@ function ItemDetails() {
             <dt>Date</dt>
             <dd>{item.date}</dd>
             <dt>Reported by</dt>
-            <dd>{reporter ? reporter.name : "Unknown"}</dd>
+            <dd>{item.reporterUsername || `User #${item.reportedBy}`}</dd>
           </dl>
         </div>
       </div>
 
     {item.reportType === "lost" && item.status === "active" && (
-      <PossibleMatches currentItem={item} allItems={items} />
+      <PossibleMatches itemId={item.id} />
     )}
 
     {item.reportType === "found" && item.status === "active" && (

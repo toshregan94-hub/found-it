@@ -54,6 +54,7 @@ function toFrontendItem(item) {
     photo: item.image_url || "",
     status: item.status,
     reportedBy: item.user_id,
+    reporterUsername: item.reporter_username,
     createdAt: item.created_at,
   };
 }
@@ -108,6 +109,24 @@ export async function getItems({ search, type, categoryId } = {}) {
   return items.map(toFrontendItem);
 }
 
+export async function getItem(id) {
+  const item = await request(
+    `/items/${id}`,
+    {},
+    "Could not load the item."
+  );
+
+  return toFrontendItem(item);
+}
+export async function getMatches(itemId) {
+  const data = await request(
+    `/items/${itemId}/matches`,
+    {},
+    "Could not load possible matches."
+  );
+
+  return data;
+}
 // Needs a logged-in user. Send categoryId (a number from getCategories), not the category name.
 export async function addItem(item) {
   const created = await request(

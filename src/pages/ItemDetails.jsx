@@ -18,7 +18,7 @@ function ItemDetails() {
   const [error, setError] = useState("");
 
   const [claims, setClaims] = useState([]);
-  const [isOwner, setIsOwner] = useState(false);
+  const [ownerFromApi, setIsOwner] = useState(false);
   const [claimError, setClaimError] = useState("");
 
   useEffect(() => {
@@ -60,8 +60,8 @@ function ItemDetails() {
     });
     if (res.ok) {
       const data = await res.json();
-      setClaims(data.claims);
-      setIsOwner(data.is_owner);
+      setClaims(Array.isArray(data) ? data : data.claims ?? []);
+      setIsOwner(data.is_owner ?? false);
     }
   }
 
@@ -100,8 +100,8 @@ function ItemDetails() {
       </section>
     );
   }
-
-  const myClaim = claims.find((c) => c.user_id === user?.id);
+  const isOwner = ownerFromApi || (user && (item.reportedBy ?? item.user_id) === user.id);
+  const myClaim = (claims ?? []).find((c) => c.user_id === user?.id);
   const canClaim =
     user &&
     !isOwner &&
@@ -116,8 +116,8 @@ function ItemDetails() {
       <Link to="/" className="item-details-back">Back to all items</Link>
 
       <div className="item-details-layout">
-        {item.image_url ? (
-          <img className="item-details-photo" src={item.image_url} alt={item.title} />
+        {item.photo ? (
+          <img className="item-details-photo" src={item.photo} alt={item.itemName ?? item.title} />
         ) : (
           <div className="item-details-photo item-details-photo--empty">
             No photo provided
@@ -130,14 +130,14 @@ function ItemDetails() {
             <span className={`item-badge item-badge--${item.status}`}>{item.status}</span>
           </div>
 
-          <h1>{item.title}</h1>
+          <h1>{item.itemName ?? item.title}</h1>
           <p className="item-details-description">{item.description}</p>
 
           <dl className="item-details-meta">
             <dt>Category</dt>
             <dd>{item.category}</dd>
             <dt>Location</dt>
-            <dd>{item.location || "Not specified"}</dd>
+            <dd>{item.location?.name || "Not specified"}</dd>
             <dt>Date</dt>
             <dd>{item.date || "Not specified"}</dd>
             <dt>Reported by</dt>

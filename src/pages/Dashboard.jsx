@@ -168,9 +168,7 @@ function Dashboard() {
           </p>
         </div>
 
-        <button type="button" className="btn">
-          Report an item
-        </button>
+        <Link to="/repot" className="btn">Report an item</Link>
       </div>
 
       {/* Dashboard statistics */}

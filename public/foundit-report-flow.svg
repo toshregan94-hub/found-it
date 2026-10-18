@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1250" fill="none">
+  <defs>
+    <linearGradient id="peach" x1="0" y1="0" x2="520" y2="580" gradientUnits="userSpaceOnUse"><stop stop-color="#F9C3AE" stop-opacity=".64"/><stop offset="1" stop-color="#F9C3AE" stop-opacity="0"/></linearGradient>
+    <linearGradient id="honey" x1="1600" y1="250" x2="1150" y2="850" gradientUnits="userSpaceOnUse"><stop stop-color="#F2CC8F" stop-opacity=".53"/><stop offset="1" stop-color="#F2CC8F" stop-opacity="0"/></linearGradient>
+    <linearGradient id="lower" x1="0" y1="910" x2="600" y2="1260" gradientUnits="userSpaceOnUse"><stop stop-color="#F9C3AE" stop-opacity=".48"/><stop offset="1" stop-color="#F9C3AE" stop-opacity="0"/></linearGradient>
+  </defs>
+  <!-- Sweeping top-left and top-right ribbons: all shapes flow off the canvas sides -->
+  <path d="M0 0H410C345 95 310 185 190 185C90 185 67 267 0 295Z" fill="url(#peach)"/>
+  <path d="M0 95C128 98 160 193 118 283C78 368 35 389 0 416" stroke="#E07A5F" stroke-opacity=".43" stroke-width="2"/>
+  <path d="M1600 0H1300C1327 80 1410 132 1494 156C1550 172 1566 214 1600 245V0Z" fill="url(#honey)"/>
+  <path d="M1600 95C1512 137 1512 242 1448 308C1405 352 1392 394 1370 420" stroke="#E07A5F" stroke-opacity=".35" stroke-width="2"/>
+  <!-- Mid-level edge curls, well outside central form -->
+  <path d="M0 450C130 393 197 526 258 610C319 691 362 693 438 744C262 733 148 763 0 700Z" fill="#F2CC8F" fill-opacity=".19"/>
+  <path d="M1600 474C1511 455 1474 557 1424 605C1384 643 1340 658 1260 687C1401 700 1510 765 1600 733Z" fill="#F9C3AE" fill-opacity=".19"/>
+  <path d="M1600 534C1505 512 1440 655 1356 680" stroke="#E07A5F" stroke-opacity=".30" stroke-width="2"/>
+  <!-- Lower organic wash, fades naturally toward the foot -->
+  <path d="M0 828C102 771 178 827 242 894C308 962 378 983 487 1008C317 1025 264 1131 138 1171C88 1188 44 1183 0 1174Z" fill="url(#lower)"/>
+  <path d="M1600 805C1478 780 1455 894 1390 955C1350 994 1322 1013 1275 1041C1405 1043 1523 1138 1600 1174Z" fill="#F2CC8F" fill-opacity=".18"/>
+  <path d="M1600 861C1523 871 1492 955 1439 1000" stroke="#E07A5F" stroke-opacity=".30" stroke-width="2"/>
+  <g fill="#E07A5F" fill-opacity=".27">
+    <circle cx="166" cy="420" r="3"/><circle cx="195" cy="420" r="3"/><circle cx="224" cy="420" r="3"/><circle cx="166" cy="449" r="3"/><circle cx="195" cy="449" r="3"/><circle cx="224" cy="449" r="3"/>
+    <circle cx="1445" cy="393" r="3"/><circle cx="1474" cy="393" r="3"/><circle cx="1503" cy="393" r="3"/><circle cx="1445" cy="422" r="3"/><circle cx="1474" cy="422" r="3"/><circle cx="1503" cy="422" r="3"/>
+  </g>
+  <!-- Small original vector motif at upper-right: backpack, phone, and keys -->
+  <g transform="translate(1245 115) scale(.64)" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="162" cy="241" rx="165" ry="19" fill="#F2CC8F" fill-opacity=".27"/>
+    <path d="M61 67C61 31 85 12 114 12C143 12 169 31 169 67" stroke="#C4613F" stroke-width="12"/>
+    <rect x="43" y="55" width="144" height="178" rx="31" fill="#E07A5F" stroke="#C4613F" stroke-width="4"/>
+    <path d="M58 78C75 65 151 64 173 80" stroke="#FAC6B0" stroke-opacity=".8" stroke-width="6"/>
+    <rect x="65" y="143" width="100" height="72" rx="17" fill="#F49F7F" stroke="#C4613F" stroke-width="3"/>
+    <path d="M79 157H150" stroke="#C4613F" stroke-width="3"/>
+    <rect x="190" y="102" width="76" height="125" rx="12" fill="#3D405B" transform="rotate(10 190 102)"/>
+    <rect x="200" y="112" width="56" height="100" rx="6" fill="#9CA6B8" transform="rotate(10 200 112)"/>
+    <circle cx="240" cy="218" r="6" fill="#F2CC8F"/>
+    <circle cx="255" cy="233" r="17" fill="none" stroke="#3D405B" stroke-width="8"/>
+    <path d="M267 246L296 274M247 249L239 269" stroke="#3D405B" stroke-width="7"/>
+    <path d="M280 264L288 257M288 272L295 265" stroke="#3D405B" stroke-width="4"/>
+    <path d="M18 97L2 81M204 33L218 12M222 71L243 66" stroke="#E07A5F" stroke-opacity=".6" stroke-width="5"/>
+  </g>
+</svg>

@@ -1,73 +1,714 @@
-.item-details-back {
-  display: inline-block;
-  margin-bottom: 1.25rem;
-  color: var(--color-primary);
-  font-weight: 600;
-  text-decoration: none;
+
+/* =========================================
+   FOUNDIT — ITEM DETAILS
+   ========================================= */
+
+.item-details {
+  width: min(100% - 2rem, 1120px);
+  margin: 2.5rem auto 5rem;
+  color: var(--color-text, #3d405b);
 }
-.item-details-back:hover { text-decoration: underline; }
+
+/* Back navigation */
+
+.item-details-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1.6rem;
+  color: var(--color-primary, #e07a5f);
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: gap 0.2s, color 0.2s;
+}
+
+.item-details-back:hover {
+  gap: 0.8rem;
+  color: var(--color-primary-dark, #c96146);
+}
+
+/* Main item card */
 
 .item-details-layout {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0;
+  overflow: hidden;
   background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 1.5rem;
+  border: 1px solid #f1e5dc;
+  border-radius: 24px;
+  box-shadow: 0 18px 50px rgba(61, 64, 91, 0.075);
 }
-@media (min-width: 768px) {
-  .item-details-layout { grid-template-columns: 1fr 1.2fr; }
+
+/* Item photo */
+
+.item-details-visual {
+  min-width: 0;
+  padding: 1.35rem;
+  background: #fff9f5;
+  display: flex;
 }
 
 .item-details-photo {
+  display: block;
   width: 100%;
-  max-height: 420px;
+  height: 100%;
+  min-height: 420px;
+  max-height: 560px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 17px;
 }
+
 .item-details-photo--empty {
-  display: grid;
-  place-items: center;
-  min-height: 240px;
-  background: var(--color-bg);
-  border: 1px dashed #d1d5db;
-  color: var(--color-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  color: #b9a79f;
+  background: #fff0e7;
+  border: 2px dashed #ebcabb;
+  font-weight: 700;
+}
+
+/* Information area */
+
+.item-details-info {
+  min-width: 0;
+  padding: 2.5rem 2.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .item-details-badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
 }
+
 .item-badge {
-  padding: 0.25rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0.35rem 0.85rem;
   border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
   text-transform: capitalize;
 }
-.item-badge--lost { background: var(--color-lost); }
-.item-badge--found { background: var(--color-found); }
-.item-badge--active { background: var(--color-primary); }
-.item-badge--resolved { background: var(--color-muted); }
 
-.item-details-info h1 { margin: 0 0 0.75rem; }
-.item-details-description { line-height: 1.6; margin-bottom: 1.25rem; }
+.item-badge--lost {
+  color: #b34a35;
+  background: #ffede6;
+}
+
+.item-badge--found {
+  color: #347d60;
+  background: #e5f4eb;
+}
+
+.item-badge--active {
+  color: #5e6582;
+  background: #edf0f7;
+}
+
+.item-badge--resolved {
+  color: #347d60;
+  background: #e5f4eb;
+}
+
+.item-details-info h1 {
+  margin: 0 0 0.85rem;
+  color: var(--color-text, #3d405b);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.item-details-description {
+  margin: 0;
+  color: #73788d;
+  font-size: 0.98rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.item-details-divider {
+  height: 1px;
+  margin: 1.6rem 0;
+  background: #f0e9e3;
+}
+
+/* Item metadata */
 
 .item-details-meta {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 0.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
   margin: 0;
 }
-.item-details-meta dt { font-weight: 600; color: var(--color-muted); }
-.item-details-meta dd { margin: 0; }
+
+.item-details-meta-row {
+  display: grid;
+  grid-template-columns: minmax(125px, 0.85fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 0.85rem;
+}
+
+.item-details-meta-row dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #8b8fa1;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.item-details-meta-row dt svg {
+  flex-shrink: 0;
+  color: var(--color-primary, #e07a5f);
+  stroke-width: 1.9;
+}
+
+.item-details-meta-row dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--color-text, #3d405b);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* Share feature */
+
+.item-details-share-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin-top: auto;
+  padding-top: 2rem;
+}
+
+.item-details-share {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 49px;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--color-primary, #e07a5f);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(224, 122, 95, 0.18);
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.item-details-share:hover {
+  background: var(--color-primary-dark, #c96146);
+  transform: translateY(-2px);
+}
+
+.item-details-share:focus-visible {
+  outline: 3px solid #f2cc8f;
+  outline-offset: 3px;
+}
+
+.item-details-share-hint {
+  margin: 0;
+  color: #9699a6;
+  font-size: 0.78rem;
+}
+
+.item-details-share-feedback {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: #347d60;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Possible matches section */
+
+.item-details-matches {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: #fff;
+  border: 1px solid #f1e5dc;
+  border-radius: 22px;
+  box-shadow: 0 12px 36px rgba(61, 64, 91, 0.045);
+}
+
+/* Claim area */
+
+.item-details-claims {
+  margin-top: 2rem;
+  padding: 2rem;
+  border: 1px solid #f1e5dc;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 12px 36px rgba(61, 64, 91, 0.045);
+}
+
+.item-details-claims:empty {
+  display: none;
+}
+
+.item-details-claims > h2 {
+  margin: 0 0 1rem;
+  color: var(--color-text, #3d405b);
+  font-size: 1.35rem;
+}
+
+.item-details-login-note,
+.item-details-claim-notice,
+.item-details-claims-empty {
+  margin: 0;
+  color: #73788d;
+  line-height: 1.7;
+}
+
+.item-details-login-note a {
+  color: var(--color-primary, #e07a5f);
+  font-weight: 800;
+}
+
+.item-details-claims .claim-card {
+  padding: 1.25rem;
+  margin-top: 1rem;
+  border: 1px solid #f1e8e1;
+  border-radius: 14px;
+  background: #fffaf7;
+}
+
+.item-details-claims .claim-card p {
+  line-height: 1.6;
+}
+
+.item-details-claims .claim-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.item-details-claims .claim-actions button {
+  padding: 0.7rem 1.1rem;
+  border: 1px solid #e6d7ce;
+  border-radius: 10px;
+  background: #fff;
+  color: #3d405b;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.item-details-claims .claim-actions button:first-child {
+  background: #e07a5f;
+  color: #fff;
+  border-color: #e07a5f;
+}
+
+.item-details-claims .claim-actions button:focus-visible {
+  outline: 3px solid #f2cc8f;
+  outline-offset: 2px;
+}
+
+/* Loading and error states */
 
 .item-details-notfound {
+  max-width: 700px;
+  margin: 4rem auto;
+  padding: 3rem 1.5rem;
   text-align: center;
-  padding: 3rem 1rem;
+  color: var(--color-text, #3d405b);
 }
-.item-details-notfound a { color: var(--color-primary); font-weight: 600; }
+
+.item-details-notfound a {
+  color: var(--color-primary, #e07a5f);
+  font-weight: 800;
+}
+
+/* Tablet */
+
+@media (max-width: 900px) {
+  .item-details-info {
+    padding: 2rem 1.7rem;
+  }
+
+  .item-details-photo {
+    min-height: 360px;
+  }
+
+  .item-details-meta-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 680px) {
+  .item-details {
+    margin: 1.5rem auto 3rem;
+  }
+
+  .item-details-layout {
+    grid-template-columns: 1fr;
+    border-radius: 19px;
+  }
+
+  .item-details-visual {
+    padding: 0.8rem;
+  }
+
+  .item-details-photo {
+    min-height: 270px;
+    max-height: 340px;
+    border-radius: 14px;
+  }
+
+  .item-details-info {
+    padding: 1.7rem 1.4rem 2rem;
+  }
+
+  .item-details-meta-row {
+    grid-template-columns: minmax(100px, 0.8fr) minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+
+  .item-details-matches,
+  .item-details-claims {
+    margin-top: 1.2rem;
+    padding: 1.3rem;
+    border-radius: 17px;
+  }
+
+  .item-details-share {
+    width: 100%;
+  }
+
+  .item-details-share-area {
+    align-items: stretch;
+  }
+
+  .item-details-share-hint {
+    text-align: center;
+  }
+}
+
+@media (max-width: 390px) {
+  .item-details-meta-row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+}
+
+
+/* ===== CLAIM APPROVAL CONTACT FORM ===== */
+
+.contact-approval-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+  padding: 1.5rem;
+  border: 1px solid #f2dbce;
+  border-radius: 18px;
+  background: #fff8f3;
+}
+
+.contact-approval-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.contact-approval-header > svg {
+  flex-shrink: 0;
+  color: #e07a5f;
+}
+
+.contact-approval-header h3 {
+  margin: 0 0 0.3rem;
+  color: #3d405b;
+  font-size: 1.15rem;
+}
+
+.contact-approval-header p {
+  margin: 0;
+  color: #85899d;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.contact-approval-form label {
+  color: #3d405b;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.contact-approval-form input,
+.contact-approval-form select {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid #dfe3eb;
+  border-radius: 12px;
+  background: white;
+  color: #3d405b;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.contact-approval-form input:focus,
+.contact-approval-form select:focus {
+  outline: 2px solid #e07a5f;
+  outline-offset: 2px;
+}
+
+.contact-approval-privacy {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin: 0.4rem 0;
+  color: #777b8c;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.contact-approval-privacy svg {
+  flex-shrink: 0;
+  color: #e07a5f;
+}
+
+.contact-approval-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.contact-approval-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.8rem 1.3rem;
+  border: none;
+  border-radius: 999px;
+  background: #e07a5f;
+  color: white;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.contact-approval-actions .contact-approval-cancel {
+  border: 1px solid #e3d8d2;
+  background: white;
+  color: #3d405b;
+}
+
+.contact-approval-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== APPROVED CLAIM — ARRANGE COLLECTION ===== */
+
+.collection-card {
+  margin-top: 1.25rem;
+  padding: 1.5rem;
+  border: 1px solid #d7eadc;
+  border-radius: 18px;
+  background: #f7fcf8;
+}
+
+.collection-card-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.collection-card-heading > svg {
+  flex-shrink: 0;
+  color: #347d60;
+}
+
+.collection-card-heading h2 {
+  margin: 0 0 0.4rem;
+  color: #3d405b;
+  font-size: 1.25rem;
+}
+
+.collection-card-heading p {
+  margin: 0;
+  color: #73788d;
+  line-height: 1.6;
+}
+
+.collection-contact {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 1.4rem;
+  padding: 1rem;
+  border: 1px solid #e8efe9;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.collection-contact > svg {
+  flex-shrink: 0;
+  color: #e07a5f;
+}
+
+.collection-contact > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.collection-contact span {
+  color: #85899d;
+  font-size: 0.8rem;
+}
+
+.collection-contact strong {
+  color: #3d405b;
+  overflow-wrap: anywhere;
+}
+
+.collection-safety {
+  margin: 1rem 0 0;
+  color: #73788d;
+  font-size: 0.83rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+  .contact-approval-form,
+  .collection-card {
+    padding: 1.1rem;
+  }
+
+  .contact-approval-actions {
+    flex-direction: column;
+  }
+
+  .contact-approval-actions button {
+    width: 100%;
+  }
+}
+
+
+/* ===== FOUNDIT CLAIM MESSAGING / NUNITO HIERARCHY ===== */
+.item-details-claims .claim-message {
+  padding: 1.4rem;
+  border: 1px solid #f1e5dc;
+  border-radius: 18px;
+  background: #fffaf6;
+  font-family: "Nunito", sans-serif;
+}
+.item-details-claims .claim-message--approved,
+.item-details-claims .claim-message--returned {
+  background: #f7fcf8;
+  border-color: #d7eadc;
+}
+.item-details-claims .claim-message--rejected {
+  background: #fbf9f8;
+  border-color: #eee6e4;
+}
+.item-details-claims .claim-message-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.95rem;
+}
+.item-details-claims .claim-message-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: #b86d43;
+  background: #fff0e7;
+}
+.item-details-claims .claim-message--approved .claim-message-icon,
+.item-details-claims .claim-message--returned .claim-message-icon {
+  color: #347d60;
+  background: #e4f3e9;
+}
+.item-details-claims .claim-message--rejected .claim-message-icon {
+  color: #73788d;
+  background: #efeff2;
+}
+.item-details-claims .claim-message-eyebrow {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #85899d;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+}
+.item-details-claims .claim-message h2 {
+  margin: 0 0 0.45rem;
+  color: #3d405b;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 800;
+}
+.item-details-claims .claim-message p {
+  margin: 0;
+  color: #626779;
+  font-size: 0.94rem;
+  line-height: 1.65;
+  font-weight: 500;
+}
+.item-details-claims .claim-message-next {
+  margin-top: 1.1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(61, 64, 91, 0.065);
+  border-radius: 13px;
+  background: #fff;
+}
+.item-details-claims .claim-message-next strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #3d405b;
+  font-size: 0.94rem;
+  font-weight: 800;
+}
+.item-details-claims .claim-message-next a {
+  display: inline-flex;
+  margin-top: 0.65rem;
+  color: #c4613f;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.item-details-claims .claim-message-next a:hover { text-decoration: underline; }
+.item-details-claims .collection-card-heading h2 { font-weight: 800; }
+.item-details-claims .collection-card-heading p { font-size: 0.94rem; }
+@media (max-width: 600px) {
+  .item-details-claims .claim-message { padding: 1.1rem; }
+  .item-details-claims .claim-message h2 { font-size: 1.12rem; }
+}

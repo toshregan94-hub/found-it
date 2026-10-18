@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { BellRing, ClipboardCheck, Package, MapPin, CalendarDays, PackageOpen, ArrowUpRight, PlusCircle } from "lucide-react";
 import {
   checkSession,
   getMyItems,
   getMyClaims,
+  getItem,
   updateItem,
   deleteItem,
 } from "../utils/api";
@@ -32,6 +34,10 @@ function Dashboard() {
   const [user, setUser] = useState(undefined);
   const [reports, setReports] = useState(null);
   const [claims, setClaims] = useState([]);
+  const [claimPhotos, setClaimPhotos] = useState({});
+  const [actionClaims, setActionClaims] = useState([]);
+  const [pendingError, setPendingError] = useState("");
+  const [activeSection, setActiveSection] = useState("action");
   const [loadError, setLoadError] = useState("");
   const [actionError, setActionError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -60,21 +66,55 @@ function Dashboard() {
         getMyItems(session.user.id),
         getMyClaims(session.user.id),
       ]);
-
       if (!ignore) {
         setReports(items);
         setClaims(claimsData.claims || []);
       }
-    }
 
-    load().catch((err) => {
-      if (!ignore) setLoadError(err.message);
-    });
+      // One server-side query for claims requiring review or handover.
+      // Does not fetch claims for each individual item.
+      try {
+        const response = await fetch(
+          "http://localhost:5555/api/claims/action-required",
+          { credentials: "include" }
+        );
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || "Could not load required actions");
+        if (!ignore) setActionClaims(payload.claims || []);
+      } catch (err) {
+        if (!ignore) setPendingError(err.message);
+      }
 
-    return () => {
-      ignore = true;
-    };
-  }, []); 
+      const claimList = claimsData.claims || [];
+
+      const uniqueItemIds = [
+        ...new Set(claimList.map((claim) => claim.item_id)),
+      ];
+
+      const results = await Promise.allSettled(
+        uniqueItemIds.map((id) => getItem(id))
+      );
+
+      const photos = {};
+
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled" && result.value.photo) {
+          photos[uniqueItemIds[index]] = result.value.photo;
+        }
+      });
+
+      if (!ignore) {
+        setClaimPhotos(photos);
+      }    }
+
+      load().catch((err) => {
+        if (!ignore) setLoadError(err.message);
+      });
+
+      return () => {
+        ignore = true;
+      };
+    }, []); 
 
 
   // Runs one request, shows the server's message if it fails.
@@ -118,6 +158,7 @@ function Dashboard() {
     run(async () => {
       const updated = await updateItem(report.id, { status: "resolved" });
       setReports((list) => list.map((r) => (r.id === report.id ? updated : r)));
+      setActionClaims((list) => list.filter((claim) => Number(claim.item_id) !== Number(report.id)));
     });
 
   const deleteReport = (report) => {
@@ -125,6 +166,7 @@ function Dashboard() {
     run(async () => {
       await deleteItem(report.id);
       setReports((list) => list.filter((r) => r.id !== report.id));
+      setActionClaims((list) => list.filter((claim) => Number(claim.item_id) !== Number(report.id)));
     });
   };
 
@@ -153,44 +195,146 @@ function Dashboard() {
     );
   }
 
-  const lostItems = reports.filter((report) => report.reportType === "lost").length;
-  const foundItems = reports.filter((report) => report.reportType === "found").length;
-  const returnedItems = reports.filter((report) => report.status === "resolved").length;
+  const lostItems = reports.filter(
+    (report) => report.reportType === "lost"
+  ).length;
+
+  const foundItems = reports.filter(
+    (report) => report.reportType === "found"
+  ).length;
+
+  const returnedItems = reports.filter(
+    (report) => report.status === "resolved"
+  ).length;
 
   return (
     <section className="dashboard-page">
+        {/* Welcome banner */}
       <div className="dashboard-header">
-        <div>
+        <div className="dashboard-welcome-content">
           <p className="dashboard-label">MY ACCOUNT</p>
-          <h1>Welcome to your dashboard</h1>
+
+          <h1>
+            Welcome back,{" "}
+            <span className="dashboard-username">
+              {user.username}!
+            </span>
+          </h1>
+
           <p className="dashboard-subtitle">
             Manage your lost and found items and claims in one place.
           </p>
         </div>
 
-        <Link to="/repot" className="btn">Report an item</Link>
+        <Link to="/report" className="btn dashboard-report-btn">
+          <PlusCircle size={19} aria-hidden="true" />
+          Report an item
+        </Link>
       </div>
 
-      {/* Dashboard statistics */}
-      <div className="dashboard-stats">
-        <div className="stat-card">
-          <span className="stat-number">{lostItems}</span>
-          <span className="stat-label">Lost items</span>
-        </div>
-
-        <div className="stat-card">
-          <span className="stat-number">{foundItems}</span>
-          <span className="stat-label">Found items</span>
-        </div>
-
-        <div className="stat-card">
-          <span className="stat-number">{returnedItems}</span>
-          <span className="stat-label">Items returned</span>
-        </div>
+      {/* Clickable dashboard views; content below changes without navigation. */}
+      <div className="dashboard-stats dashboard-navigation" role="group" aria-label="Dashboard sections">
+        {[
+          { id: "reports", title: "My Reports", count: reports.length, Icon: Package },
+          { id: "claims", title: "My Claims", count: claims.length, Icon: ClipboardCheck },
+          { id: "action", title: "Needs Action", count: actionClaims.length, Icon: BellRing },
+        ].map(({ id: sectionId, title, count, Icon }) => (
+          <button
+            key={sectionId}
+            type="button"
+            className={`stat-card dashboard-nav-card ${activeSection === sectionId ? "is-selected" : ""}`}
+            aria-pressed={activeSection === sectionId}
+            onClick={() => setActiveSection(sectionId)}
+          >
+            <span className="stat-icon" aria-hidden="true"><Icon size={26} /></span>
+            <span className="stat-content">
+              <span className="stat-number">{count}</span>
+              <span className="stat-label">{title}</span>
+            </span>
+          </button>
+        ))}
       </div>
+
+      <div className="dashboard-view-tools">
+        <span>Choose a card to view that section.</span>
+        <button type="button" className="dashboard-account-toggle" onClick={() => setActiveSection("account")}>
+          {activeSection === "account" ? "Viewing account" : "Account information"}
+        </button>
+      </div>
+
+      {activeSection === "action" && (
+        <div className="dashboard-section dashboard-current-view">
+          <div className="section-heading">
+            <div>
+              <h2>Needs Your Attention</h2>
+              <p>Review new claims and complete handovers for approved claims.</p>
+            </div>
+          </div>
+          {actionError && <p className="field-error" role="alert">{actionError}</p>}
+          {pendingError && (
+            <p className="field-error" role="alert">
+              Could not load actions: {pendingError}. Confirm the new backend route is running.
+            </p>
+          )}
+          {!pendingError && actionClaims.length === 0 && (
+            <div className="dashboard-action-empty">
+              <ClipboardCheck size={28} />
+              <div>
+                <h3>You're all caught up</h3>
+                <p>New claims and handovers awaiting completion will appear here.</p>
+              </div>
+            </div>
+          )}
+          <div className="dashboard-items">
+            {actionClaims.map((claim) => (
+              <article className="dashboard-item dashboard-action-item" key={claim.id}>
+                <div className="dashboard-action-icon">
+                  {claim.status === "approved" ? <PackageOpen size={24} /> : <BellRing size={24} />}
+                </div>
+                <div className="dashboard-action-content">
+                  <h3>
+                    {claim.status === "approved" ? "Awaiting handover" : "New claim"}
+                    {" — "}{claim.item_title || `Item #${claim.item_id}`}
+                  </h3>
+                  <p>
+                    {claim.status === "approved"
+                      ? `Claim approved for ${claim.claimant || "a claimant"}. Mark the report as returned only after the actual handover.`
+                      : <><strong>{claim.claimant || "A user"}</strong> submitted ownership details for review.</>}
+                  </p>
+                  {claim.created_at && <p className="dashboard-action-date">Claim submitted {new Date(claim.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>}
+                </div>
+                <div className="dashboard-action-controls">
+                  <Link to={`/items/${claim.item_id}#claims`} className="secondary-button dashboard-review-link">
+                    {claim.status === "approved" ? "View item" : "Review claim"} <ArrowUpRight size={17} />
+                  </Link>
+                  {claim.status === "approved" && (
+                    <button
+                      type="button"
+                      className="btn dashboard-handover-button"
+                      disabled={saving}
+                      onClick={() => {
+                        const report = reports.find((r) => Number(r.id) === Number(claim.item_id));
+                        if (!report) {
+                          setActionError("Report not found. Refresh the dashboard and try again.");
+                          return;
+                        }
+                        if (window.confirm("Has this item actually been handed over to its owner?")) {
+                          closeReport(report);
+                        }
+                      }}
+                    >
+                      Mark as returned
+                    </button>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* My reported items */}
-      <div className="dashboard-section">
+      {activeSection === "reports" && <div className="dashboard-section dashboard-current-view">
         <div className="section-heading">
           <div>
             <h2>My reported items</h2>
@@ -268,30 +412,55 @@ function Dashboard() {
                 </div>
               ) : (
                 <>
-                  <div className="item-info">
-                    <span
-                      className={`badge ${
-                        report.reportType === "lost"
-                          ? "badge-lost"
-                          : "badge-found"
-                      }`}
-                    >
-                      {report.reportType === "lost" ? "Lost" : "Found"}
-                    </span>
 
-                    <h3>{report.itemName}</h3>
+                  <div className="dashboard-report-content">
+                    <div className="dashboard-report-thumbnail">
+                      {report.photo ? (
+                        <img
+                          src={report.photo}
+                          alt={report.itemName}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <PackageOpen size={30} aria-label="No photo available" />
+                      )}
+                    </div>
 
-                    <p>Reported from {report.location.name}</p>
-
-                    <span className="item-date">
-                      {formatDate(report.date)}
-                    </span>
-
-                    {report.status === "resolved" && (
-                      <span className="closed-text">
-                        This report has been closed.
+                    <div className="item-info">
+                      <span
+                        className={`badge ${
+                          report.reportType === "lost"
+                            ? "badge-lost"
+                            : "badge-found"
+                        }`}
+                      >
+                        {report.reportType === "lost" ? "Lost" : "Found"}
                       </span>
-                    )}
+
+                      <h3>{report.itemName}</h3>
+
+                      <p>
+                        <MapPin size={16} aria-hidden="true" />{" "}
+                        {report.location?.name || "Location not specified"}
+                      </p>
+
+                      <p className="item-date">
+                        <CalendarDays size={16} aria-hidden="true" />{" "}
+                        {formatDate(report.date)}
+                      </p>
+
+                      {report.category && (
+                        <span className="dashboard-category">
+                          {report.category}
+                        </span>
+                      )}
+
+                      {report.status === "resolved" && (
+                        <span className="closed-text">
+                          This report has been closed.
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="report-right">
@@ -322,7 +491,7 @@ function Dashboard() {
                             disabled={saving}
                             onClick={() => closeReport(report)}
                           >
-                            Close report
+                            {report.status === "claimed" ? "Mark as returned" : "Close report"}
                           </button>
                         </>
                       )}
@@ -342,10 +511,10 @@ function Dashboard() {
             </article>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* My claims */}
-      <div className="dashboard-section">
+      {activeSection === "claims" && <div className="dashboard-section dashboard-current-view">
         <div className="section-heading">
           <div>
             <h2>My claims</h2>
@@ -358,37 +527,71 @@ function Dashboard() {
           <p>You have not submitted any claims yet.</p>)}
           {claims.map((claim) => (
             <article className="dashboard-item" key={claim.id}>
-              <div className="item-info">
-                <h3>{`Item #${claim.item_id}`}</h3>
 
-                <p>
-                  Claim submitted on{" "}
-                  {claim.created_at
-                    ? new Date(claim.created_at).toLocaleDateString("en-GB")
-                    : "Unknown date"}
-                </p>
+              <div className="dashboard-claim-content">
+
+                <div className="dashboard-claim-icon">
+                  {claimPhotos[claim.item_id] ? (
+                    <img
+                      src={claimPhotos[claim.item_id]}
+                      alt={claim.item_title || "Claimed item"}
+                      loading="lazy"
+                      className="dashboard-claim-photo"
+                    />
+                  ) : (
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8 12 4l7 4v9l-7 4-7-4V8Z" />
+                      <path d="m5 8 7 4 7-4" />
+                      <path d="M12 12v9" />
+                    </svg>
+                  )}
+                </div>
+
+                <div className="item-info">
+                  <h3>{claim.item_title || `Item #${claim.item_id}`}</h3>
+
+                  <p className="dashboard-claim-date">
+                    <CalendarDays size={16} aria-hidden="true" />
+                    Claim submitted on{" "}
+                    {claim.created_at
+                      ? new Date(claim.created_at).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })
+                      : "Unknown date"}
+                  </p>
+                </div>
               </div>
-              <Link to={`/items/${claim.item_id}`} className="secondary-button">
-                View item
-              </Link>
-              <span
-                className={`status-badge ${
-                  claim.status === "approved"
-                    ? "status-returned"
-                    : "status-active"
-                }`}
-              >
-                {claim.status
-                  ? claim.status.charAt(0).toUpperCase() + claim.status.slice(1)
-                  : "Unknown"}
-              </span>
+              <div className="claim-card-actions">
+                <span className={`status-badge claim-status-${claim.status}`}>
+                  {claim.status
+                    ? claim.status.charAt(0).toUpperCase() + claim.status.slice(1)
+                    : "Unknown"}
+                </span>
+
+                <Link
+                  to={`/items/${claim.item_id}`}
+                  className="secondary-button claim-view-link"
+                >
+                  View item <span aria-hidden="true">↗</span>
+                </Link>
+              </div>            
             </article>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Account information */}
-      <div className="dashboard-section">
+      {activeSection === "account" && <div className="dashboard-section dashboard-current-view">
         <div className="section-heading">
           <div>
             <h2>Account information</h2>
@@ -396,18 +599,53 @@ function Dashboard() {
           </div>
         </div>
 
-        <div className="account-card">
-          <div>
+
+      <div className="account-card dashboard-account-card">
+        {/* Name */}
+        <div className="dashboard-account-detail">
+          <span className="dashboard-account-icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+            </svg>
+          </span>
+
+          <div className="dashboard-account-text">
             <span className="account-label">Name</span>
             <strong>{user?.username || "Unknown user"}</strong>
           </div>
+        </div>
 
-          <div>
+        {/* Email */}
+        <div className="dashboard-account-detail">
+          <span className="dashboard-account-icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="m3 7 9 6 9-6" />
+            </svg>
+          </span>
+
+          <div className="dashboard-account-text">
             <span className="account-label">Email</span>
             <strong>{user?.email || "No email available"}</strong>
           </div>
         </div>
       </div>
+      </div>}
     </section>
   );
 }

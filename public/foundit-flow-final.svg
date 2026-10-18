@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1400" preserveAspectRatio="xMidYMin meet">
+<defs>
+  <linearGradient id="peach" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffd7c6"/><stop offset="1" stop-color="#f2a58d"/></linearGradient>
+  <linearGradient id="honey" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe1a9"/><stop offset="1" stop-color="#f8cc8b"/></linearGradient>
+  <linearGradient id="bottomFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="white"/><stop offset=".74" stop-color="white"/><stop offset="1" stop-color="black"/></linearGradient>
+  <mask id="fade"><rect width="1600" height="1400" fill="url(#bottomFade)"/></mask>
+</defs>
+<g mask="url(#fade)">
+<!-- top corner sculptural shapes -->
+<path d="M0 0H295C264 94 209 139 113 130C48 124 23 159 0 194Z" fill="url(#peach)" opacity=".43"/>
+<path d="M1080 0H1600V235C1490 212 1445 133 1322 125C1209 116 1158 64 1080 0Z" fill="url(#honey)" opacity=".58"/>
+<path d="M0 170C98 230 159 176 219 289S286 405 366 440" stroke="#e07a5f" stroke-width="2" opacity=".54" fill="none"/>
+<path d="M1205 0C1270 99 1420 70 1502 141S1578 203 1600 209" stroke="#e07a5f" stroke-width="2" opacity=".50" fill="none"/>
+<!-- left ribbons spanning middle: all shapes originate at canvas edges, avoiding cutoffs -->
+<path d="M0 320C127 275 163 373 257 442C343 505 391 569 311 652C244 724 103 680 0 748Z" fill="url(#honey)" opacity=".31"/>
+<path d="M0 475C121 420 196 518 278 566C381 624 322 724 219 795C135 856 77 811 0 862Z" fill="url(#peach)" opacity=".24"/>
+<path d="M0 370C133 345 161 453 245 505S356 612 278 697" stroke="#e07a5f" stroke-width="2" opacity=".30" fill="none"/>
+<!-- right ribbons, staggered -->
+<path d="M1600 350C1470 322 1439 443 1352 488C1260 536 1213 602 1316 669C1401 726 1498 680 1600 740Z" fill="url(#peach)" opacity=".27"/>
+<path d="M1600 525C1491 466 1432 586 1351 643C1259 710 1293 794 1400 841C1486 882 1545 829 1600 883Z" fill="url(#honey)" opacity=".26"/>
+<path d="M1600 423C1501 401 1443 505 1384 561C1310 631 1300 680 1376 738" stroke="#e07a5f" stroke-width="2" opacity=".29" fill="none"/>
+<!-- second gentle wave rhythm lower down -->
+<path d="M0 925C125 859 198 992 302 1026C409 1062 452 1136 321 1200C223 1247 112 1159 0 1254Z" fill="url(#peach)" opacity=".23"/>
+<path d="M1600 960C1474 907 1434 1040 1310 1078C1239 1099 1200 1184 1322 1229C1419 1269 1519 1208 1600 1300Z" fill="url(#honey)" opacity=".27"/>
+<path d="M0 1010C116 976 205 1051 267 1120" stroke="#e07a5f" stroke-width="2" opacity=".24" fill="none"/>
+<path d="M1600 1042C1491 1027 1427 1127 1381 1163" stroke="#e07a5f" stroke-width="2" opacity=".24" fill="none"/>
+<g fill="#e07a5f" opacity=".38"><circle cx="263" cy="185" r="3"/><circle cx="291" cy="185" r="3"/><circle cx="319" cy="185" r="3"/><circle cx="263" cy="213" r="3"/><circle cx="291" cy="213" r="3"/><circle cx="319" cy="213" r="3"/><circle cx="1462" cy="326" r="3"/><circle cx="1490" cy="326" r="3"/><circle cx="1518" cy="326" r="3"/><circle cx="1462" cy="354" r="3"/><circle cx="1490" cy="354" r="3"/><circle cx="1518" cy="354" r="3"/></g>
+</g>
+</svg>

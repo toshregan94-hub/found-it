@@ -1,6 +1,7 @@
 import Hero from "../components/Hero";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Search, MapPin, CalendarDays, ImageOff } from "lucide-react";
 import { getItems, getCategories } from "../utils/api";
 import "./Home.css";
 
@@ -9,17 +10,13 @@ function Home() {
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [categories, setCategories] = useState([]);
-  const [items, setItems] = useState(null); // null = still loading
+  const [items, setItems] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    getCategories()
-      .then(setCategories)
-      .catch(() => {}); // the category filter just stays empty; the item error below covers a down server
+    getCategories().then(setCategories).catch(() => {});
   }, []);
 
-  // The backend does the searching and filtering; the newest reports come first.
-  // The short delay stops a request being sent on every keystroke.
   useEffect(() => {
     let ignore = false;
     const timer = setTimeout(() => {
@@ -30,7 +27,9 @@ function Home() {
             setError("");
           }
         })
-        .catch((err) => { if (!ignore) setError(err.message); });
+        .catch((err) => {
+          if (!ignore) setError(err.message);
+        });
     }, 300);
     return () => {
       ignore = true;
@@ -41,17 +40,22 @@ function Home() {
   const shownItems = items || [];
 
   return (
-    <div className="container">
-        <Hero />
+    <div className="container home-page">
+      <Hero />
 
       <div className="home-controls">
-        <input
-          className="input"
-          type="text"
-          placeholder="Search items..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="home-search">
+          <Search className="home-search-icon" size={20} strokeWidth={2} aria-hidden="true" />
+          <input
+            className="input home-search-input"
+            type="search"
+            aria-label="Search reported items"
+            placeholder="Search for a phone, backpack, keys..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
         <select
           className="input"
           aria-label="Filter by category"
@@ -63,14 +67,16 @@ function Home() {
             <option key={category.id} value={category.id}>{category.name}</option>
           ))}
         </select>
+
         <div className="filter-buttons">
           {["all", "lost", "found"].map((type) => (
             <button
               key={type}
+              type="button"
               className={filter === type ? "btn" : "btn btn-outline"}
               onClick={() => setFilter(type)}
             >
-              {type}
+              {type.charAt(0).toUpperCase() + type.slice(1)}
             </button>
           ))}
         </div>
@@ -86,11 +92,37 @@ function Home() {
         <div className="items-grid">
           {shownItems.map((item) => (
             <Link to={`/items/${item.id}`} key={item.id} className="card item-card">
-              {item.photo && <img className="item-card-photo" src={item.photo} alt={item.itemName} />}
-              <span className={`badge badge-${item.reportType}`}>{item.reportType}</span>
-              <h3>{item.itemName}</h3>
-              <p>{item.location.name}</p>
-              <small>{item.category} · {item.date}</small>
+              <div className="item-card-image">
+                {item.photo ? (
+                  <img className="item-card-photo" src={item.photo} alt={item.itemName} />
+                ) : (
+                  <div className="item-card-placeholder">
+                    <ImageOff size={30} strokeWidth={1.7} aria-hidden="true" />
+                    <span>No photo available</span>
+                  </div>
+                )}
+              </div>
+              <div className="item-card-details">
+                <span className={`badge badge-${item.reportType}`}>
+                  {item.reportType}
+                </span>
+                <h3>{item.itemName}</h3>
+                <p className="item-card-meta">
+                  <MapPin size={16} strokeWidth={2} aria-hidden="true" />
+                  <span>{item.location?.name || "Location not specified"}</span>
+                </p>
+                <p className="item-card-meta">
+                  <CalendarDays size={16} strokeWidth={2} aria-hidden="true" />
+                  <span>
+                    {item.date
+                      ? new Date(`${item.date}T00:00:00`).toLocaleDateString("en-GB", {
+                          day: "numeric", month: "short", year: "numeric",
+                        })
+                      : "Date not specified"}
+                  </span>
+                </p>
+                <span className="item-card-category">{item.category}</span>
+              </div>
             </Link>
           ))}
         </div>

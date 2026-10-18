@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { searchPlaces } from "../utils/geoapify";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getCategories, addItem } from "../utils/api";
 import { fileToDataUrl } from "../utils/image";
 import "./ReportItem.css";
 
 function ReportItem() {
+  const [searchParams] = useSearchParams();
+  const requestedType = searchParams.get("type") === "found" ? "found" : "lost";
   const photoInputRef = useRef(null);
   const [form, setForm] = useState({
-    reportType: "lost", itemName: "", category: "", description: "", date: "",
+    reportType: requestedType, itemName: "", category: "", description: "", date: "",
   });
   const [photo, setPhoto] = useState("");
   const [query, setQuery] = useState("");
@@ -25,6 +27,12 @@ function ReportItem() {
   const [categories, setCategories] = useState([]); // [{ id, name }] from the backend
   const [categoriesError, setCategoriesError] = useState("");
   const [needsLogin, setNeedsLogin] = useState(false);
+
+  // Keep the selected option in sync when navigating between hero links.
+  // Preserve all other entered form fields.
+  useEffect(() => {
+    setForm((current) => ({ ...current, reportType: requestedType }));
+  }, [requestedType]);
 
   useEffect(() => {
     getCategories()
@@ -133,12 +141,53 @@ function ReportItem() {
     );
   }
 
-  return (
-    <section className="report-page">
-      <h1>Report an item</h1>
-      <p className="report-intro">Share a few details to help reunite an item with its owner.</p>
+return (
+  <section className="report-page">
 
-      <form className="report-form" onSubmit={handleSubmit}>
+<div className="report-card">
+  <div className="report-card-header">
+    <div className="report-card-header-content">
+      <span className="report-card-eyebrow">
+        LOST & FOUND
+      </span>
+
+      <h1>Report an item</h1>
+
+      <p className="report-intro">
+        Share a few details to help reunite an item with its owner.
+      </p>
+    </div>
+
+    <svg
+      className="report-card-header-icon"
+      viewBox="0 0 48 48"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        cx="20"
+        cy="20"
+        r="12"
+        stroke="currentColor"
+        strokeWidth="3"
+      />
+      <path
+        d="M29 29L40 40"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <path
+        d="M15 20L19 24L25 17"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </div>
+
+  <form className="report-form" onSubmit={handleSubmit}>
         <div className="type-toggle" role="radiogroup" aria-label="Report type">
           <label className={`type-option type-lost${form.reportType === "lost" ? " selected" : ""}`}>
             <input type="radio" name="reportType" value="lost"
@@ -239,10 +288,10 @@ function ReportItem() {
         )}
         <button className="submit-btn" type="submit" disabled={saving}>
           {saving ? "Saving..." : "Submit report"}
-        </button>
-      </form>
-    </section>
-  );
-}
+      </button>
+    </form>
+    </div>
+  </section>
+);}
 
 export default ReportItem;

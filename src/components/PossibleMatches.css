@@ -1,10 +1,59 @@
+
+/* =========================================
+   FOUNDIT — POSSIBLE MATCHES
+   ========================================= */
+
 .matches-section {
-  margin-top: 2rem;
+  margin: 0;
+  width: 100%;
+  min-width: 0;
 }
 
-.matches-section h2 {
-  margin-bottom: 1rem;
+/* Section heading */
+
+.matches-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.7rem;
 }
+
+.matches-eyebrow {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--color-primary, #e07a5f);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.matches-heading h2 {
+  margin: 0 0 0.45rem;
+  color: var(--color-primary, #e07a5f);
+  font-size: clamp(1.45rem, 2.5vw, 1.8rem);
+  font-weight: 800;
+}
+
+.matches-heading p {
+  margin: 0;
+  color: #85899d;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.matches-heading-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: #fff0e7;
+  color: #e07a5f;
+}
+
+/* Matches list */
 
 .matches-list {
   display: grid;
@@ -12,46 +61,282 @@
 }
 
 .match-card {
-  padding: 1.25rem;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background-color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  min-width: 0;
+  padding: 1.2rem;
+  border: 1px solid #f0e5de;
+  border-radius: 18px;
+  background: #fffdfa;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    transform 0.2s;
 }
 
-.match-card h3 {
-  margin-top: 0;
-  margin-bottom: 0.75rem;
+.match-card:hover {
+  border-color: #edc5b4;
+  box-shadow: 0 10px 25px rgba(61, 64, 91, 0.06);
+  transform: translateY(-2px);
 }
+
+/* Thumbnail placeholder */
+
+.match-card-visual {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 112px;
+  height: 112px;
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, #fff0e7, #fce6d2);
+  color: #e07a5f;
+}
+
+.match-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.match-card-top h3 {
+  margin: 0 0 0.75rem;
+  color: #3d405b;
+  font-size: 1.13rem;
+  font-weight: 800;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* Category, location and date */
 
 .match-details {
-  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1.3rem;
+  margin-bottom: 0.9rem;
 }
 
-.match-details p {
-  margin: 0.35rem 0;
+.match-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  color: #767c91;
+  font-size: 0.83rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
+
+.match-detail svg {
+  flex-shrink: 0;
+  color: #e07a5f;
+  stroke-width: 1.8;
+}
+
+/* Matching information */
+
+.match-metrics {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+}
+
+.match-score,
+.match-distance {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.79rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.match-score {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  color: #bd5b46;
+  background: #fff0e7;
+}
+
+.match-distance {
+  color: #82879b;
+}
+
+.match-distance svg {
+  color: #e07a5f;
+}
+
+/* View item link */
 
 .match-link {
-  display: inline-block;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid #3d405b;
+  border-radius: 12px;
+  background: #fff;
+  color: #3d405b;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1.3;
   text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.2s;
 }
 
 .match-link:hover {
-  text-decoration: underline;
-}
-
-.match-link {
-  display: inline-block;
-  margin-top: 0.5rem;
-  padding: 0.65rem 1rem;
-  border: 1px solid currentColor;
-  border-radius: 6px;
-  font-weight: 600;
+  color: #fff;
+  border-color: #3d405b;
+  background: #3d405b;
   text-decoration: none;
 }
 
-.match-link:hover {
-  text-decoration: none;
-  opacity: 0.8;
+.match-link:focus-visible {
+  outline: 3px solid #f2cc8f;
+  outline-offset: 3px;
+}
+
+/* Loading, empty and error states */
+
+.matches-message {
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: #fff9f5;
+  color: #85899d;
+}
+
+.matches-message--error {
+  color: #b34a35;
+}
+
+.matches-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 2.5rem 1.5rem;
+  border: 1px dashed #edd9cc;
+  border-radius: 16px;
+  background: #fffbf8;
+  text-align: center;
+}
+
+.matches-empty > svg {
+  color: #e07a5f;
+}
+
+.matches-empty h3 {
+  margin: 0;
+  color: #3d405b;
+  font-size: 1.05rem;
+}
+
+.matches-empty p {
+  margin: 0;
+  max-width: 350px;
+  color: #85899d;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Responsive layouts */
+
+@media (max-width: 850px) {
+  .match-card {
+    flex-wrap: wrap;
+  }
+
+  .match-link {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .matches-heading-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .match-card {
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .match-card-visual {
+    width: 70px;
+    height: 70px;
+  }
+
+  .match-card-visual svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .match-card-content {
+    flex-basis: calc(100% - 86px);
+  }
+
+  .match-details {
+    gap: 0.45rem 0.85rem;
+  }
+
+  .match-link {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+
+/* Actual matched item photograph */
+
+.match-card-visual {
+  overflow: hidden;
+}
+
+.match-card-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Lost / Found badge */
+
+.match-card-top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.match-type-badge {
+  display: inline-flex;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.match-type-badge--lost {
+  background: #fde7e9;
+  color: #bc4252;
+}
+
+.match-type-badge--found {
+  background: #e5f4eb;
+  color: #347d60;
 }

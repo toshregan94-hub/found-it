@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 1600 1100"
+     preserveAspectRatio="xMidYMin slice">
+
+  <rect width="1600" height="1100" fill="#fff8f0"/>
+
+  <!-- Top-left peach shape -->
+  <path d="M0 0 H250
+           C245 92 180 145 82 132
+           C22 124 0 156 0 188 Z"
+        fill="#f9c3ae" opacity="0.58"/>
+
+  <!-- Top-right honey shape -->
+  <path d="M1045 0 H1600 V250
+           C1505 232 1455 150 1335 138
+           C1190 124 1145 82 1045 0 Z"
+        fill="#f2cc8f" opacity="0.50"/>
+
+  <!-- Top-right coral flow line -->
+  <path d="M1185 0
+           C1250 108 1410 62 1490 145
+           S1565 205 1628 224"
+        fill="none"
+        stroke="#e07a5f"
+        stroke-width="2"
+        opacity="0.58"/>
+
+  <!-- Left-side flowing coral line -->
+  <path d="M0 165
+           C92 220 168 178 220 300
+           S300 442 378 500"
+        fill="none"
+        stroke="#e07a5f"
+        stroke-width="2"
+        opacity="0.62"/>
+
+  <!-- Left middle honey sweep -->
+  <path d="M0 335
+           C118 308 166 402 246 472
+           S360 552 430 602
+           C252 618 156 548 0 604 Z"
+        fill="#f2cc8f" opacity="0.38"/>
+
+  <!-- Left middle peach sweep -->
+  <path d="M0 462
+           C120 438 188 508 286 528
+           S400 566 460 628
+           C260 660 144 586 0 654 Z"
+        fill="#f9c3ae" opacity="0.22"/>
+
+  <!-- Very soft centre blush -->
+  <path d="M810 500
+           C900 438 1036 470 1104 558
+           C1010 596 896 598 810 500 Z"
+        fill="#f9c3ae" opacity="0.14"/>
+
+  <!-- Right lower coral shape - toned down -->
+  <path d="M1600 520
+           C1488 530 1440 604 1360 664
+           S1236 724 1135 752
+           C1326 798 1464 742 1600 692 Z"
+        fill="#e07a5f" opacity="0.34"/>
+
+  <!-- Right lower peach overlay -->
+  <path d="M1600 640
+           C1476 612 1370 714 1230 744
+           S1078 786 990 828
+           L1600 832 Z"
+        fill="#f9c3ae" opacity="0.20"/>
+
+  <!-- Bottom honey ribbon - lighter and higher -->
+  <path d="M0 760
+           C176 708 278 846 474 822
+           S748 786 934 852
+           S1270 806 1454 846
+           S1542 850 1600 836
+           V920 H0 Z"
+        fill="#f2cc8f" opacity="0.30"/>
+
+  <!-- Bottom coral ribbon - softer -->
+  <path d="M0 846
+           C172 798 286 904 474 886
+           S754 862 944 916
+           S1260 900 1448 920
+           S1540 926 1600 916
+           V980 H0 Z"
+        fill="#e07a5f" opacity="0.22"/>
+
+  <!-- Bottom accent line -->
+  <path d="M470 786
+           C658 744 760 904 934 844
+           S1146 796 1268 846"
+        fill="none"
+        stroke="#e07a5f"
+        stroke-width="2"
+        opacity="0.30"/>
+
+  <!-- Decorative dots -->
+  <g fill="#e07a5f" opacity="0.42">
+    <circle cx="242" cy="186" r="3"/>
+    <circle cx="272" cy="186" r="3"/>
+    <circle cx="302" cy="186" r="3"/>
+    <circle cx="242" cy="214" r="3"/>
+    <circle cx="272" cy="214" r="3"/>
+    <circle cx="302" cy="214" r="3"/>
+
+    <circle cx="1460" cy="350" r="3"/>
+    <circle cx="1488" cy="350" r="3"/>
+    <circle cx="1516" cy="350" r="3"/>
+    <circle cx="1460" cy="378" r="3"/>
+    <circle cx="1488" cy="378" r="3"/>
+    <circle cx="1516" cy="378" r="3"/>
+
+    <circle cx="1435" cy="680" r="3"/>
+    <circle cx="1463" cy="680" r="3"/>
+    <circle cx="1491" cy="680" r="3"/>
+    <circle cx="1435" cy="708" r="3"/>
+    <circle cx="1463" cy="708" r="3"/>
+    <circle cx="1491" cy="708" r="3"/>
+  </g>
+
+</svg>

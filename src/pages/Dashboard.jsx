@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import CategoryManager from "../components/CategoryManager";
 import { BellRing, ClipboardCheck, Package, MapPin, CalendarDays, PackageOpen, ArrowUpRight, PlusCircle } from "lucide-react";
 import {
   checkSession,
@@ -646,6 +647,7 @@ function Dashboard() {
         </div>
       </div>
       </div>}
+      {activeSection === "reports" && <CategoryManager />}
     </section>
   );
 }

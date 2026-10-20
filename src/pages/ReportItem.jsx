@@ -136,7 +136,15 @@ function ReportItem() {
   if (submitted) {
     return (
       <section className="report-page">
-        <p className="field-ok">Your report was submitted. Thank you!</p>
+        <div style={{ textAlign: "center", padding: "3rem 1rem" }}>
+            <p className="field-ok" style={{ fontSize: "1.2rem", marginBottom: "1.5rem" }}>
+              ✅ Your report was submitted. Thank you!
+            </p>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+              <Link to="/" className="btn">Back to all items</Link>
+              <Link to="/dashboard" className="switch-button">View my reports</Link>
+            </div>
+          </div>
       </section>
     );
   }

@@ -5,7 +5,11 @@
 //   Pages:  itemName / reportType / category + categoryId / location {name, lat, lon} / photo / reportedBy
 // Keep the translation here so no page has to know about the backend's names.
 
-const API_URL = import.meta.env?.VITE_API_URL ?? "http://localhost:5555/api";
+const API_BASE = (
+  import.meta.env.VITE_API_URL || "http://localhost:5555"
+).replace(/\/+$/, "");
+
+const API_URL = `${API_BASE}/api`;
 
 const OFFLINE_MSG =
   "Can't reach the server. Open a second terminal and run: python app.py";
@@ -201,14 +205,12 @@ export function logout() {
 }
 
 // Returns { logged_in, user }. Never throws, so pages can call it on load.
-export async function checkSession() {
-  try {
-    return await request(
-      "/check_session",
-      {},
-      "Could not check your session."
-    );
-  } catch {
-    return { logged_in: false, user: null };
-  }
+// Returns { logged_in, user }.
+// A failed request is not the same as a logged-out session.
+export function checkSession() {
+  return request(
+    "/check_session",
+    {},
+    "Could not check your session."
+  );
 }

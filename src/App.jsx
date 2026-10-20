@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -5,6 +6,7 @@ import ReportItem from "./pages/ReportItem";
 import ItemDetails from "./pages/ItemDetails";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import VerifyEmail from "./pages/VerifyEmail";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -19,6 +21,7 @@ function App() {
           <Route path="/items/:id" element={<ItemDetails />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

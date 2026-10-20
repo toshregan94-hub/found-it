@@ -2,13 +2,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import {
-  Search,
-  Heart,
-  Sparkles,
-} from "lucide-react";
+import { Search, Heart, Sparkles } from "lucide-react";
 
-const API = "http://localhost:5555";
+const API = import.meta.env.VITE_API_URL || "http://localhost:5555";
 
 const emptyForm = {
   username: "",
@@ -28,7 +24,9 @@ async function post(path, body) {
   const data = await res.json();
 
   if (!res.ok) {
-    throw new Error(data.error || "Something went wrong");
+    const error = new Error(data.error || "Something went wrong");
+    error.details = data;
+    throw error;
   }
 
   return data;
@@ -44,20 +42,17 @@ function Login() {
   const [loading, setLoading] = useState(false);
 
   function handleChange(e) {
-    setForm({
-      ...form,
+    setForm((previous) => ({
+      ...previous,
       [e.target.name]: e.target.value,
-    });
+    }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setMessage("");
 
-    if (
-      isRegistering &&
-      form.password !== form.confirmPassword
-    ) {
+    if (isRegistering && form.password !== form.confirmPassword) {
       setMessage("Passwords do not match.");
       return;
     }
@@ -65,20 +60,24 @@ function Login() {
     setLoading(true);
 
     try {
-      let identifier = form.email;
-
       if (isRegistering) {
-        await post("/api/register", {
+        const data = await post("/api/register", {
           username: form.username,
           email: form.email,
           password: form.password,
         });
 
-        identifier = form.username;
+        navigate("/verify-email", {
+          state: {
+            email: data.email || form.email.trim().toLowerCase(),
+          },
+        });
+
+        return;
       }
 
       const data = await post("/api/login", {
-        identifier,
+        identifier: form.email,
         password: form.password,
       });
 
@@ -86,6 +85,17 @@ function Login() {
       setForm(emptyForm);
       navigate("/dashboard");
     } catch (err) {
+      if (err.details?.verification_required) {
+        navigate("/verify-email", {
+          state: {
+            email: err.details.email || (
+              isRegistering ? form.email.trim().toLowerCase() : ""
+            ),
+          },
+        });
+        return;
+      }
+
       setMessage(err.message);
     } finally {
       setLoading(false);
@@ -132,13 +142,8 @@ function Login() {
                 />
               </svg>
 
-              <span className="auth-logo-found">
-                und
-              </span>
-
-              <span className="auth-logo-it">
-                It
-              </span>
+              <span className="auth-logo-found">und</span>
+              <span className="auth-logo-it">It</span>
 
               <Sparkles
                 className="auth-logo-sparkle"
@@ -174,18 +179,14 @@ function Login() {
                 <span aria-hidden="true">
                   <Heart size={24} strokeWidth={2} />
                 </span>
-                <p>
-                  Help reunite items with their owners
-                </p>
+                <p>Help reunite items with their owners</p>
               </div>
 
               <div>
                 <span aria-hidden="true">
                   <Sparkles size={24} strokeWidth={2} />
                 </span>
-                <p>
-                  Be part of a caring community
-                </p>
+                <p>Be part of a caring community</p>
               </div>
             </div>
           </div>
@@ -195,14 +196,10 @@ function Login() {
 
         <div className="foundit-auth-form-panel">
           <div className="auth-card">
-
             <div className="auth-header">
               <h1>
-                {isRegistering
-                  ? "Create an account"
-                  : "Welcome back"}
+                {isRegistering ? "Create an account" : "Welcome back"}
               </h1>
-
               <p>
                 {isRegistering
                   ? "Create an account to start using FoundIt."
@@ -210,16 +207,10 @@ function Login() {
               </p>
             </div>
 
-            <form
-              className="auth-form"
-              onSubmit={handleSubmit}
-            >
+            <form className="auth-form" onSubmit={handleSubmit}>
               {isRegistering && (
                 <div className="form-group">
-                  <label htmlFor="username">
-                    Username
-                  </label>
-
+                  <label htmlFor="username">Username</label>
                   <input
                     id="username"
                     name="username"
@@ -228,6 +219,8 @@ function Login() {
                     placeholder="Choose a username"
                     value={form.username}
                     onChange={handleChange}
+                    maxLength={80}
+                    autoComplete="username"
                     required
                   />
                 </div>
@@ -235,17 +228,12 @@ function Login() {
 
               <div className="form-group">
                 <label htmlFor="email">
-                  {isRegistering
-                    ? "Email address"
-                    : "Email or username"}
+                  {isRegistering ? "Email address" : "Email or username"}
                 </label>
-
                 <input
                   id="email"
                   name="email"
-                  type={
-                    isRegistering ? "email" : "text"
-                  }
+                  type={isRegistering ? "email" : "text"}
                   className="input"
                   placeholder={
                     isRegistering
@@ -254,15 +242,14 @@ function Login() {
                   }
                   value={form.email}
                   onChange={handleChange}
+                  maxLength={120}
+                  autoComplete={isRegistering ? "email" : "username"}
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="password">
-                  Password
-                </label>
-
+                <label htmlFor="password">Password</label>
                 <input
                   id="password"
                   name="password"
@@ -275,8 +262,9 @@ function Login() {
                   }
                   value={form.password}
                   onChange={handleChange}
-                  minLength={
-                    isRegistering ? 8 : undefined
+                  minLength={isRegistering ? 8 : undefined}
+                  autoComplete={
+                    isRegistering ? "new-password" : "current-password"
                   }
                   required
                 />
@@ -287,7 +275,6 @@ function Login() {
                   <label htmlFor="confirmPassword">
                     Confirm password
                   </label>
-
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -296,6 +283,7 @@ function Login() {
                     placeholder="Confirm your password"
                     value={form.confirmPassword}
                     onChange={handleChange}
+                    autoComplete="new-password"
                     required
                   />
                 </div>
@@ -335,15 +323,11 @@ function Login() {
                   setMessage("");
                 }}
               >
-                {isRegistering
-                  ? "Log in"
-                  : "Create an account"}
+                {isRegistering ? "Log in" : "Create an account"}
               </button>
             </div>
-
           </div>
         </div>
-
       </div>
     </section>
   );

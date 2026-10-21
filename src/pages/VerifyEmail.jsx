@@ -2,24 +2,15 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, MailCheck } from "lucide-react";
+import { request } from "../utils/api";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5555";
 
-async function post(path, body) {
-  const res = await fetch(`${API}${path}`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error || "Something went wrong.");
-  }
-
-  return data;
+function post(path, body) {
+  return request(
+    path,
+    { method: "POST", body },
+    "Something went wrong."
+  );
 }
 
 function VerifyEmail() {
@@ -48,7 +39,7 @@ function VerifyEmail() {
     setLoading(true);
 
     try {
-      const data = await post("/api/verify-email", {
+      const data = await post("/verify-email", {
         email: email.trim().toLowerCase(),
         code,
       });
@@ -70,7 +61,7 @@ function VerifyEmail() {
     setResending(true);
 
     try {
-      const data = await post("/api/resend-verification", {
+      const data = await post("/resend-verification", {
         email: email.trim().toLowerCase(),
         password,
       });

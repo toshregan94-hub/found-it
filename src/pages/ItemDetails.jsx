@@ -117,7 +117,16 @@ function ItemDetails() {
       setClaimError(err.message);
     }
   }
+    // Load claims when the item or signed-in user changes.
+    useEffect(() => {
+      if (!user) {
+        setClaims([]);
+        setIsOwner(false);
+        return;
+      }
 
+      loadClaims();
+    }, [id, user?.id]);
   // -----------------------------------------
   // APPROVE OR REJECT A CLAIM
   // -----------------------------------------

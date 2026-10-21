@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { getCategories, addItem } from "../utils/api";
 import { fileToDataUrl } from "../utils/image";
 import "./ReportItem.css";
+import { ClipboardList } from "lucide-react";
 
 function ReportItem() {
   const [searchParams] = useSearchParams();
@@ -142,7 +143,8 @@ function ReportItem() {
             </p>
             <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
               <Link to="/" className="btn">Back to all items</Link>
-              <Link to="/dashboard" className="switch-button">View my reports</Link>
+              <Link to="/dashboard" className="view-reports-btn"><ClipboardList size={17} aria-hidden="true" />
+              View my reports</Link>
             </div>
           </div>
       </section>

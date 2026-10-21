@@ -1,0 +1,16 @@
+.footer {
+  margin-top: 3rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  border-top: 1px dashed #f0c9a0;
+  color: #777;
+}
+.footer-brand {
+  font-weight: 700;
+  color: #e5675a;
+  margin-bottom: 0.25rem;
+}
+.footer-small {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}

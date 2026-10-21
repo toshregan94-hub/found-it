@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import TipFinder from "../components/TipFinder";
 import {
   ArrowLeft,
   CalendarDays,
@@ -477,7 +478,11 @@ function ItemDetails() {
             onClaimed={loadClaims}
           />
         )}
-
+        {myClaim && myClaim.status === "approved" && (
+            <div style={{ margin: "1.5rem 0" }}>
+              <TipFinder itemId={item.id} />
+            </div>
+          )}
         {/* CLAIMANT'S STATUS — helpful next steps */}
 
         {myClaim && (() => {

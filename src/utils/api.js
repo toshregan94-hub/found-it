@@ -212,3 +212,11 @@ export async function checkSession() {
     return { logged_in: false, user: null };
   }
 }
+
+export function sendTip(itemId, amount, phone) {
+  return request(`/items/${itemId}/tips`, { method: "POST", body: { amount, phone } }, "Could not send the tip.");
+}
+
+export function getTipStatus(tipId) {
+  return request(`/tips/${tipId}/status`, {}, "Could not check the tip.");
+}

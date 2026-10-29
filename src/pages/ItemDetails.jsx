@@ -799,5 +799,5 @@ function ItemDetails() {
     </section>
   );
 }
-
+//final export
 export default ItemDetails;
